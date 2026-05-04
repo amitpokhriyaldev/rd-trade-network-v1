@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { motion } from "framer-motion"
+import { useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   Package,
   Search,
@@ -12,13 +12,13 @@ import {
   Clock,
   ChevronLeft,
   ChevronRight,
-} from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { AnimatedSection } from "@/components/sections/animated-section"
-import { mockShipments } from "@/data/mock-data"
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { AnimatedSection } from "@/components/sections/animated-section";
+import { mockShipments } from "@/data/mock-data";
 
 const statusColors: Record<string, string> = {
   ordered: "bg-blue-500",
@@ -28,7 +28,7 @@ const statusColors: Record<string, string> = {
   delivered: "bg-green-500",
   returned: "bg-red-500",
   cancelled: "bg-gray-500",
-}
+};
 
 const statusLabels: Record<string, string> = {
   ordered: "Ordered",
@@ -38,20 +38,21 @@ const statusLabels: Record<string, string> = {
   delivered: "Delivered",
   returned: "Returned",
   cancelled: "Cancelled",
-}
+};
 
 export default function ShipmentsPage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const filteredShipments = mockShipments.filter((shipment) => {
     const matchesSearch =
       shipment.tracking_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       shipment.sender_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      shipment.receiver_name.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesStatus = statusFilter === "all" || shipment.status === statusFilter
-    return matchesSearch && matchesStatus
-  })
+      shipment.receiver_name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all" || shipment.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50/50">
@@ -60,7 +61,9 @@ export default function ShipmentsPage() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h1 className="text-3xl font-bold text-primary">My Shipments</h1>
-              <p className="text-muted-foreground">Manage and track all your shipments</p>
+              <p className="text-muted-foreground">
+                Manage and track all your shipments
+              </p>
             </div>
             <Button className="gap-2">
               <Package className="h-4 w-4" />
@@ -144,26 +147,40 @@ export default function ShipmentsPage() {
                       >
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className={`w-2 h-8 rounded-full ${statusColors[shipment.status]}`} />
+                            <div
+                              className={`w-2 h-8 rounded-full ${statusColors[shipment.status]}`}
+                            />
                             <div>
-                              <p className="font-mono font-semibold text-sm">{shipment.tracking_id}</p>
-                              <p className="text-xs text-muted-foreground">{shipment.weight} kg</p>
+                              <p className="font-mono font-semibold text-sm">
+                                {shipment.tracking_id}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {shipment.weight} kg
+                              </p>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <p className="text-sm font-medium">{shipment.sender_city} → {shipment.receiver_city}</p>
+                          <p className="text-sm font-medium">
+                            {shipment.sender_address} →{" "}
+                            {shipment.receiver_address}
+                          </p>
                           <p className="text-xs text-muted-foreground">
-                            {shipment.sender_pincode} → {shipment.receiver_pincode}
+                            {shipment.sender_pincode} →{" "}
+                            {shipment.receiver_pincode}
                           </p>
                         </td>
                         <td className="px-6 py-4">
-                          <Badge className={`${statusColors[shipment.status]} text-white border-0`}>
+                          <Badge
+                            className={`${statusColors[shipment.status]} text-white border-0`}
+                          >
                             {statusLabels[shipment.status]}
                           </Badge>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-sm capitalize">{shipment.service_type}</span>
+                          <span className="text-sm capitalize">
+                            {shipment.service_type}
+                          </span>
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-1 text-sm">
@@ -195,5 +212,5 @@ export default function ShipmentsPage() {
         </AnimatedSection>
       </div>
     </div>
-  )
+  );
 }

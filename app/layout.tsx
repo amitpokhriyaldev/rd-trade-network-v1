@@ -1,23 +1,34 @@
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "react-hot-toast"
-import { Navbar } from "@/components/layout/navbar"
-import { Footer } from "@/components/layout/footer"
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "react-hot-toast";
+import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
-})
+});
 
 export const metadata: Metadata = {
   title: {
     default: "RD Trade Network Pvt. Ltd. | Single Window Logistics Solutions",
     template: "%s | RD Trade Network",
   },
-  description: "RD Trade Network Pvt. Ltd. - Leading logistics company in India offering courier, air cargo, rail cargo, surface transport, and supply chain solutions. 16+ years of experience, 21000+ pin codes served.",
-  keywords: ["logistics", "courier", "cargo", "air cargo", "rail cargo", "surface transport", "India logistics", "RD Trade Network", "supply chain"],
+  description:
+    "RD Trade Network Pvt. Ltd. - Leading logistics company in India offering courier, air cargo, rail cargo, surface transport, and supply chain solutions. 16+ years of experience, 21000+ pin codes served.",
+  keywords: [
+    "logistics",
+    "courier",
+    "cargo",
+    "air cargo",
+    "rail cargo",
+    "surface transport",
+    "India logistics",
+    "RD Trade Network",
+    "supply chain",
+  ],
   authors: [{ name: "RD Trade Network" }],
   creator: "RD Trade Network Pvt. Ltd.",
   metadataBase: new URL("https://rdtradenetwork.in"),
@@ -27,7 +38,8 @@ export const metadata: Metadata = {
     url: "https://rdtradenetwork.in",
     siteName: "RD Trade Network Pvt. Ltd.",
     title: "RD Trade Network | Single Window Logistics Solutions",
-    description: "Leading logistics company in India with 16+ years experience. Air cargo, rail cargo, surface transport & courier services across 21000+ pin codes.",
+    description:
+      "Leading logistics company in India with 16+ years experience. Air cargo, rail cargo, surface transport & courier services across 21000+ pin codes.",
     images: [
       {
         url: "/og-image.jpg",
@@ -40,7 +52,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "RD Trade Network | Logistics Solutions",
-    description: "Single Window Logistics Solutions - Air Cargo, Rail Cargo, Surface Transport & Courier Services",
+    description:
+      "Single Window Logistics Solutions - Air Cargo, Rail Cargo, Surface Transport & Courier Services",
     images: ["/og-image.jpg"],
   },
   robots: {
@@ -57,12 +70,12 @@ export const metadata: Metadata = {
   verification: {
     google: "your-google-verification-code",
   },
-}
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -73,19 +86,19 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
             <Footer />
           </div>
-          <Toaster 
-            position="top-right" 
+          <Toaster
+            position="top-right"
             toastOptions={{
               duration: 4000,
               style: {
-                background: '#1e3a8a',
-                color: '#fff',
-                borderRadius: '12px',
+                background: "#1e3a8a",
+                color: "#fff",
+                borderRadius: "12px",
               },
             }}
           />
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }

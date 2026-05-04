@@ -27,6 +27,7 @@ const navLinks = [
   { href: "/about", label: "About Us" },
   { href: "/services", label: "Services" },
   { href: "/track", label: "Track Shipment" },
+  { href: "/pincode", label: "Pincode Check" },
   { href: "/contact", label: "Contact" },
 ];
 
