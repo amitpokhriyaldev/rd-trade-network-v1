@@ -13,11 +13,6 @@ import {
   AlertCircle,
   ArrowRight,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { AnimatedSection } from "@/components/sections/animated-section";
 import { useTrackingStore } from "@/lib/store";
 import { Shipment, ShipmentStatus } from "@/types";
@@ -25,51 +20,89 @@ import toast from "react-hot-toast";
 
 const statusConfig: Record<
   ShipmentStatus,
-  { label: string; color: string; icon: React.ElementType; progress: number }
+  {
+    label: string;
+    bg: string;
+    text: string;
+    iconBg: string;
+    bar: string;
+    icon: React.ElementType;
+    progress: number;
+  }
 > = {
   ordered: {
     label: "Ordered",
-    color: "bg-blue-500",
+    bg: "from-blue-600 to-blue-700",
+    text: "text-blue-600",
+    iconBg: "bg-blue-500/15",
+    bar: "bg-blue-500",
     icon: Package,
     progress: 10,
   },
   picked_up: {
     label: "Picked Up",
-    color: "bg-blue-600",
+    bg: "from-blue-700 to-blue-800",
+    text: "text-blue-700",
+    iconBg: "bg-blue-600/15",
+    bar: "bg-blue-600",
     icon: Truck,
     progress: 25,
   },
   in_transit: {
     label: "In Transit",
-    color: "bg-amber-500",
+    bg: "from-amber-500 to-amber-600",
+    text: "text-amber-600",
+    iconBg: "bg-amber-500/15",
+    bar: "bg-amber-500",
     icon: Truck,
     progress: 50,
   },
   out_for_delivery: {
     label: "Out for Delivery",
-    color: "bg-orange-500",
+    bg: "from-orange-500 to-orange-600",
+    text: "text-orange-500",
+    iconBg: "bg-orange-500/15",
+    bar: "bg-orange-500",
     icon: MapPin,
     progress: 75,
   },
   delivered: {
     label: "Delivered",
-    color: "bg-green-500",
+    bg: "from-emerald-500 to-emerald-600",
+    text: "text-emerald-600",
+    iconBg: "bg-emerald-500/15",
+    bar: "bg-emerald-500",
     icon: CheckCircle,
     progress: 100,
   },
   returned: {
     label: "Returned",
-    color: "bg-red-500",
+    bg: "from-red-500 to-red-600",
+    text: "text-red-500",
+    iconBg: "bg-red-500/15",
+    bar: "bg-red-500",
     icon: AlertCircle,
     progress: 0,
   },
   cancelled: {
     label: "Cancelled",
-    color: "bg-gray-500",
+    bg: "from-slate-500 to-slate-600",
+    text: "text-slate-500",
+    iconBg: "bg-slate-500/15",
+    bar: "bg-slate-400",
     icon: AlertCircle,
     progress: 0,
   },
 };
+
+// Progress step labels
+const progressSteps = [
+  "Ordered",
+  "Picked Up",
+  "In Transit",
+  "Out for Delivery",
+  "Delivered",
+];
 
 export default function TrackContent() {
   const [trackingId, setTrackingId] = useState("");
@@ -92,16 +125,13 @@ export default function TrackContent() {
       toast.error("Please enter a tracking ID");
       return;
     }
-
     setIsLoading(true);
     setShipment(null);
-
     try {
-      const response = await fetch(
+      const res = await fetch(
         `/api/tracking?trackingId=${encodeURIComponent(trackId)}`,
       );
-      const data = await response.json();
-
+      const data = await res.json();
       if (data.shipment) {
         setShipment(data.shipment);
         addToHistory(data.shipment);
@@ -109,7 +139,7 @@ export default function TrackContent() {
       } else {
         toast.error("No shipment found with this tracking ID");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to track shipment. Please try again.");
     } finally {
       setIsLoading(false);
@@ -120,58 +150,114 @@ export default function TrackContent() {
     e.preventDefault();
     handleTrack();
   };
-
   const currentStatus = shipment ? statusConfig[shipment.status] : null;
 
   return (
     <div className="min-h-screen">
-      {/* Hero */}
-      <section className="relative py-16 lg:py-24 bg-gradient-to-br from-primary-950 via-primary-900 to-primary-800">
+      {/* ── 1. HERO — Dark Navy ── */}
+      <section className="relative py-24 lg:py-32 bg-gradient-to-br from-[#0a1628] via-[#0d1f3c] to-[#0a1628] overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: `linear-gradient(#ffffff 1px, transparent 1px), linear-gradient(90deg, #ffffff 1px, transparent 1px)`,
+            backgroundSize: "60px 60px",
+          }}
+        />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-orange-500/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-blue-700/10 rounded-full blur-[100px] pointer-events-none" />
+
         <div className="container mx-auto px-4 relative z-10">
           <AnimatedSection className="text-center max-w-2xl mx-auto">
-            <h1 className="text-3xl lg:text-5xl font-bold text-white mb-4">
-              Track Your Shipment
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-orange-500/10 border border-orange-500/30 rounded-full mb-6">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-400" />
+              </span>
+              <span className="text-sm text-orange-300 font-medium uppercase tracking-wider">
+                Real-time Tracking
+              </span>
+            </div>
+            <h1 className="text-3xl lg:text-5xl font-extrabold text-white leading-tight mb-4">
+              Track Your{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-300">
+                Shipment
+              </span>
             </h1>
-            <p className="text-white/70">
+            <p className="text-white/55 text-base leading-relaxed">
               Enter your tracking ID to get real-time updates on your shipment
             </p>
           </AnimatedSection>
         </div>
+
+        {/* Bottom wave */}
+        <div className="absolute bottom-0 left-0 right-0 leading-none">
+          <svg
+            viewBox="0 0 1440 60"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="block w-full"
+            style={{ marginBottom: "-1px" }}
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M0 60L60 52C120 44 240 28 360 22C480 16 600 18 720 22C840 26 960 34 1080 38C1200 42 1320 42 1380 42L1440 42V60H0Z"
+              fill="white"
+            />
+          </svg>
+        </div>
       </section>
 
-      {/* Search Form */}
-      <section className="py-12 -mt-8">
-        <div className="container mx-auto px-4">
+      {/* ── 2. SEARCH — White (overlapping hero) ── */}
+      <section className="relative bg-white pb-8">
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `radial-gradient(circle, #0a1628 1px, transparent 1px)`,
+            backgroundSize: "28px 28px",
+          }}
+        />
+        <div className="container mx-auto px-4 relative z-10">
           <AnimatedSection>
-            <Card className="max-w-2xl mx-auto p-6 lg:p-8 shadow-xl">
-              <form onSubmit={handleSubmit} className="flex gap-3">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    placeholder="Enter Tracking ID (e.g., RDTN8X2K9P4M)"
-                    value={trackingId}
-                    onChange={(e) =>
-                      setTrackingId(e.target.value.toUpperCase())
-                    }
-                    className="pl-10 h-14 text-lg"
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  size="lg"
-                  isLoading={isLoading}
-                  className="h-14 px-8 gap-2"
-                >
-                  Track
-                  <ArrowRight className="h-5 w-5" />
-                </Button>
-              </form>
-            </Card>
+            <div className="max-w-2xl mx-auto -mt-10">
+              <div className="relative bg-white border border-slate-200/80 rounded-3xl p-6 lg:p-8 shadow-[0_8px_40px_oklch(0.2_0.01_80/0.10)] overflow-hidden">
+                {/* Top accent */}
+                <div className="absolute top-0 left-12 right-12 h-0.5 bg-gradient-to-r from-transparent via-orange-400 to-transparent rounded-full" />
+
+                <form onSubmit={handleSubmit} className="flex gap-3">
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="Enter Tracking ID (e.g., RDTN8X2K9P4M)"
+                      value={trackingId}
+                      onChange={(e) =>
+                        setTrackingId(e.target.value.toUpperCase())
+                      }
+                      className="w-full h-14 pl-11 pr-4 rounded-xl bg-slate-50 border border-slate-200 text-[#0a1628] text-sm font-medium placeholder:text-slate-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/15 focus:bg-white transition-all duration-200"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="h-14 px-7 flex items-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-400 text-white font-semibold rounded-xl shadow-md shadow-orange-500/25 transition-all duration-200 hover:-translate-y-0.5 text-sm shrink-0"
+                  >
+                    {isLoading ? (
+                      <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        Track
+                        <ArrowRight className="h-4 w-4" />
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+            </div>
           </AnimatedSection>
         </div>
       </section>
 
-      {/* Results */}
+      {/* ── 3. RESULTS — White (continued) ── */}
       <AnimatePresence>
         {shipment && currentStatus && (
           <motion.section
@@ -179,124 +265,201 @@ export default function TrackContent() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -30 }}
             transition={{ duration: 0.5 }}
-            className="pb-20"
+            className="pb-24 bg-white relative"
           >
-            <div className="container mx-auto px-4">
-              {/* Status Overview */}
-              <Card className="mb-8 overflow-hidden">
-                <div className={`p-6 ${currentStatus.color} text-white`}>
-                  <div className="flex items-center justify-between">
+            <div
+              className="absolute inset-0 opacity-[0.03] pointer-events-none"
+              style={{
+                backgroundImage: `radial-gradient(circle, #0a1628 1px, transparent 1px)`,
+                backgroundSize: "28px 28px",
+              }}
+            />
+            <div className="container mx-auto px-4 relative z-10">
+              {/* Status Banner */}
+              <div className="max-w-4xl mx-auto mb-6">
+                <div
+                  className={`relative bg-gradient-to-r ${currentStatus.bg} rounded-2xl p-6 lg:p-8 overflow-hidden shadow-lg`}
+                >
+                  <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                  <div className="relative z-10 flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-4">
-                      <currentStatus.icon className="h-10 w-10" />
+                      <div className="p-3 bg-white/20 rounded-xl">
+                        <currentStatus.icon className="h-8 w-8 text-white" />
+                      </div>
                       <div>
-                        <p className="text-sm opacity-90">Current Status</p>
-                        <p className="text-2xl font-bold">
+                        <p className="text-white/70 text-xs font-medium uppercase tracking-wider">
+                          Current Status
+                        </p>
+                        <p className="text-2xl font-extrabold text-white">
                           {currentStatus.label}
                         </p>
                       </div>
                     </div>
-                    <Badge
-                      variant="secondary"
-                      className="bg-white/20 text-white border-0"
-                    >
-                      {shipment.tracking_id}
-                    </Badge>
+                    <div className="px-4 py-2 bg-white/15 border border-white/20 rounded-xl">
+                      <p className="text-xs text-white/60 uppercase tracking-wider mb-0.5">
+                        Tracking ID
+                      </p>
+                      <p className="font-mono font-bold text-white text-sm">
+                        {shipment.tracking_id}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Progress steps */}
+                  <div className="relative z-10 mt-6">
+                    <div className="flex justify-between mb-2">
+                      {progressSteps.map((step, i) => {
+                        const stepProgress = (i + 1) * 20;
+                        const isActive = currentStatus.progress >= stepProgress;
+                        return (
+                          <span
+                            key={step}
+                            className={`text-xs font-medium hidden sm:block ${isActive ? "text-white" : "text-white/40"}`}
+                          >
+                            {step}
+                          </span>
+                        );
+                      })}
+                    </div>
+                    <div className="w-full h-2 bg-white/20 rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full bg-white rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${currentStatus.progress}%` }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                      />
+                    </div>
                   </div>
                 </div>
-                <CardContent className="p-6">
-                  <Progress value={currentStatus.progress} className="mb-6" />
+              </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                      <p className="text-sm text-muted-foreground">From</p>
-                      <p className="font-semibold">{shipment.sender_name}</p>
-                      <p className="text-sm">{shipment.sender_address}</p>
-                      <p className="text-sm text-muted-foreground">
+              {/* Shipment Info Card */}
+              <div className="max-w-4xl mx-auto mb-6">
+                <div className="bg-white border border-slate-200/80 rounded-2xl p-6 lg:p-8 shadow-[0_4px_24px_oklch(0.2_0.01_80/0.07)] overflow-hidden relative">
+                  <div className="absolute top-0 left-12 right-12 h-0.5 bg-gradient-to-r from-transparent via-orange-400 to-transparent rounded-full" />
+
+                  {/* From → To */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                      <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                        From
+                      </p>
+                      <p className="font-bold text-[#0a1628]">
+                        {shipment.sender_name}
+                      </p>
+                      <p className="text-sm text-slate-500 mt-1">
+                        {shipment.sender_address}
+                      </p>
+                      <p className="text-xs text-orange-500 font-medium mt-1">
                         PIN: {shipment.sender_pincode}
                       </p>
                     </div>
+
                     <div className="flex items-center justify-center">
-                      <ArrowRight className="h-8 w-8 text-primary hidden md:block" />
-                      <div className="md:hidden text-center">
-                        <ArrowRight className="h-6 w-6 text-primary rotate-90 mx-auto" />
+                      <div className="flex items-center gap-2">
+                        <div className="h-px w-8 bg-slate-300 hidden md:block" />
+                        <div className="p-2.5 bg-orange-500/10 rounded-full">
+                          <ArrowRight className="h-5 w-5 text-orange-500 hidden md:block" />
+                          <ArrowRight className="h-5 w-5 text-orange-500 rotate-90 md:hidden" />
+                        </div>
+                        <div className="h-px w-8 bg-slate-300 hidden md:block" />
                       </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">To</p>
-                      <p className="font-semibold">{shipment.receiver_name}</p>
-                      <p className="text-sm">{shipment.receiver_address}</p>
-                      <p className="text-sm text-muted-foreground">
+
+                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                      <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                        To
+                      </p>
+                      <p className="font-bold text-[#0a1628]">
+                        {shipment.receiver_name}
+                      </p>
+                      <p className="text-sm text-slate-500 mt-1">
+                        {shipment.receiver_address}
+                      </p>
+                      <p className="text-xs text-orange-500 font-medium mt-1">
                         PIN: {shipment.receiver_pincode}
                       </p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Service</p>
-                      <p className="font-semibold capitalize">
-                        {shipment.service_type}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Weight</p>
-                      <p className="font-semibold">{shipment.weight} kg</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        Dimensions
-                      </p>
-                      <p className="font-semibold">{shipment.dimensions}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        Est. Delivery
-                      </p>
-                      <p className="font-semibold">
-                        {shipment.estimated_delivery}
-                      </p>
-                    </div>
+                  {/* Details grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-slate-100">
+                    {[
+                      { label: "Service", value: shipment.service_type },
+                      { label: "Weight", value: `${shipment.weight} kg` },
+                      { label: "Dimensions", value: shipment.dimensions },
+                      {
+                        label: "Est. Delivery",
+                        value: shipment.estimated_delivery,
+                      },
+                    ].map((item) => (
+                      <div
+                        key={item.label}
+                        className="bg-slate-50 rounded-xl p-3.5 border border-slate-100"
+                      >
+                        <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
+                          {item.label}
+                        </p>
+                        <p className="font-bold text-[#0a1628] text-sm capitalize">
+                          {item.value}
+                        </p>
+                      </div>
+                    ))}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Timeline */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Shipment Timeline</CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="relative">
-                    <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200" />
+              <div className="max-w-4xl mx-auto">
+                <div className="bg-white border border-slate-200/80 rounded-2xl p-6 lg:p-8 shadow-[0_4px_24px_oklch(0.2_0.01_80/0.07)] overflow-hidden relative">
+                  <div className="absolute top-0 left-12 right-12 h-0.5 bg-gradient-to-r from-transparent via-[#0a1628]/20 to-transparent rounded-full" />
+
+                  <h3 className="text-lg font-extrabold text-[#0a1628] mb-7">
+                    Shipment Timeline
+                  </h3>
+
+                  <div className="relative space-y-0">
+                    {/* Vertical line */}
+                    <div className="absolute left-4 top-0 bottom-0 w-px bg-gradient-to-b from-orange-400/60 via-slate-200 to-transparent" />
 
                     {shipment.timeline.map((event, index) => {
-                      const eventStatus = statusConfig[event.status];
-                      const isLast = index === shipment.timeline.length - 1;
+                      const evSt = statusConfig[event.status];
+                      const isLatest = index === shipment.timeline.length - 1;
 
                       return (
                         <motion.div
                           key={index}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.15 }}
-                          className="relative flex gap-6 pb-8 last:pb-0"
+                          transition={{ delay: index * 0.12 }}
+                          className="relative flex gap-5 pb-7 last:pb-0"
                         >
+                          {/* Dot */}
                           <div
-                            className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center ${
-                              isLast ? eventStatus.color : "bg-gray-200"
-                            } ${isLast ? "text-white" : "text-gray-500"}`}
+                            className={`relative z-10 shrink-0 w-8 h-8 rounded-full flex items-center justify-center shadow-sm
+                            ${
+                              isLatest
+                                ? `bg-gradient-to-br ${evSt.bg} text-white shadow-md`
+                                : "bg-white border-2 border-slate-200 text-slate-400"
+                            }`}
                           >
-                            <eventStatus.icon className="h-4 w-4" />
+                            <evSt.icon className="h-3.5 w-3.5" />
                           </div>
+
+                          {/* Content */}
                           <div className="flex-1 pt-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Badge
-                                variant={isLast ? "default" : "outline"}
-                                className="text-xs"
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <span
+                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold
+                                ${
+                                  isLatest
+                                    ? `${evSt.iconBg} ${evSt.text}`
+                                    : "bg-slate-100 text-slate-500"
+                                }`}
                               >
-                                {eventStatus.label}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">
+                                {evSt.label}
+                              </span>
+                              <span className="text-xs text-slate-400">
                                 {new Date(event.timestamp).toLocaleString(
                                   "en-IN",
                                   {
@@ -308,10 +471,12 @@ export default function TrackContent() {
                                 )}
                               </span>
                             </div>
-                            <p className="text-sm font-medium">
+                            <p
+                              className={`text-sm font-semibold ${isLatest ? "text-[#0a1628]" : "text-slate-600"}`}
+                            >
                               {event.location}
                             </p>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-xs text-slate-400 mt-0.5">
                               {event.description}
                             </p>
                           </div>
@@ -319,44 +484,59 @@ export default function TrackContent() {
                       );
                     })}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           </motion.section>
         )}
       </AnimatePresence>
 
-      {/* Empty State / Info */}
+      {/* ── 4. EMPTY STATE — White ── */}
       {!shipment && !isLoading && (
-        <section className="pb-20">
-          <div className="container mx-auto px-4">
+        <section className="pb-24 bg-white relative">
+          <div
+            className="absolute inset-0 opacity-[0.03] pointer-events-none"
+            style={{
+              backgroundImage: `radial-gradient(circle, #0a1628 1px, transparent 1px)`,
+              backgroundSize: "28px 28px",
+            }}
+          />
+          <div className="container mx-auto px-4 relative z-10">
             <AnimatedSection>
-              <div className="max-w-2xl mx-auto text-center">
-                <Package className="h-16 w-16 text-primary/20 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-primary mb-2">
+              <div className="max-w-2xl mx-auto text-center pt-8">
+                {/* Empty icon */}
+                <div className="inline-flex p-5 bg-[#0a1628]/5 rounded-2xl mb-5">
+                  <Package className="h-12 w-12 text-[#0a1628]/20" />
+                </div>
+                <h3 className="text-xl font-extrabold text-[#0a1628] mb-2">
                   Enter a Tracking ID
                 </h3>
-                <p className="text-muted-foreground mb-8">
+                <p className="text-slate-500 text-sm leading-relaxed mb-8 max-w-md mx-auto">
                   Use your shipment tracking ID to get real-time updates. Try
-                  these demo IDs: RDTN8X2K9P4M, RDTN5Y7L3Q9R, RDTN2A4B6C8D
+                  these demo IDs below:
                 </p>
 
+                {/* Demo IDs */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {[
                     {
                       id: "RDTN8X2K9P4M",
                       status: "In Transit",
-                      color: "text-amber-600",
+                      dot: "bg-amber-400",
+                      badge: "text-amber-600 bg-amber-50 border-amber-200",
                     },
                     {
                       id: "RDTN5Y7L3Q9R",
                       status: "Delivered",
-                      color: "text-green-600",
+                      dot: "bg-emerald-400",
+                      badge:
+                        "text-emerald-600 bg-emerald-50 border-emerald-200",
                     },
                     {
                       id: "RDTN2A4B6C8D",
                       status: "Picked Up",
-                      color: "text-blue-600",
+                      dot: "bg-blue-400",
+                      badge: "text-blue-600 bg-blue-50 border-blue-200",
                     },
                   ].map((demo) => (
                     <button
@@ -365,13 +545,22 @@ export default function TrackContent() {
                         setTrackingId(demo.id);
                         handleTrack(demo.id);
                       }}
-                      className="p-4 border rounded-lg hover:border-primary hover:bg-primary/5 transition-all text-left"
+                      className="group relative bg-white border border-slate-200 hover:border-orange-300 rounded-2xl p-5 text-left transition-all duration-300 hover:shadow-[0_4px_24px_oklch(0.2_0.01_80/0.10)] overflow-hidden"
                     >
-                      <p className="font-mono text-sm font-semibold text-primary">
+                      <div className="absolute top-0 left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-orange-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500 rounded-full" />
+                      <p className="font-mono text-sm font-bold text-[#0a1628] mb-2">
                         {demo.id}
                       </p>
-                      <p className={`text-xs ${demo.color} mt-1`}>
-                        {demo.status}
+                      <div className="flex items-center gap-1.5">
+                        <div className={`h-2 w-2 rounded-full ${demo.dot}`} />
+                        <span
+                          className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${demo.badge}`}
+                        >
+                          {demo.status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400 mt-2 group-hover:text-orange-500 transition-colors flex items-center gap-1">
+                        Click to track <ArrowRight className="h-3 w-3" />
                       </p>
                     </button>
                   ))}

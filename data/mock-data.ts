@@ -1,4 +1,12 @@
-import { Shipment, Service, Testimonial, Stat, Director, Milestone, PincodeService } from "@/types"
+import {
+  Shipment,
+  Service,
+  Testimonial,
+  Stat,
+  Director,
+  Milestone,
+  PincodeService,
+} from "@/types";
 
 export const stats: Stat[] = [
   { label: "Years Experience", value: "16", suffix: "+", icon: "Calendar" },
@@ -7,13 +15,14 @@ export const stats: Stat[] = [
   { label: "Happy Clients", value: "50,000", suffix: "+", icon: "Users" },
   { label: "Deliveries Daily", value: "10,000", suffix: "+", icon: "Package" },
   { label: "Success Rate", value: "99.8", suffix: "%", icon: "TrendingUp" },
-]
+];
 
 export const services: Service[] = [
   {
     id: "air-cargo",
     title: "Air Cargo Services",
-    description: "Fast and reliable air cargo solutions through commercial airlines including Vistara, Air India, and Indigo. Same-day pickup with next-flight availability for critical shipments.",
+    description:
+      "Fast and reliable air cargo solutions through commercial airlines including Vistara, Air India, and Indigo. Same-day pickup with next-flight availability for critical shipments.",
     icon: "Plane",
     features: [
       "Same-day pickup with next-flight option",
@@ -29,7 +38,8 @@ export const services: Service[] = [
   {
     id: "surface-transport",
     title: "Surface Transport",
-    description: "Economical door-to-door ground distribution service covering 55,400+ locations across India. Ideal for less time-sensitive shipments with cost-effective logistics solutions.",
+    description:
+      "Economical door-to-door ground distribution service covering 55,400+ locations across India. Ideal for less time-sensitive shipments with cost-effective logistics solutions.",
     icon: "Truck",
     features: [
       "Coverage across 55,400+ locations",
@@ -45,7 +55,8 @@ export const services: Service[] = [
   {
     id: "rail-cargo",
     title: "Rail Cargo Services",
-    description: "Comprehensive train cargo services across India with RR booking, rail lease booking, and wagon booking options. Reliable and cost-effective for heavy and bulk shipments.",
+    description:
+      "Comprehensive train cargo services across India with RR booking, rail lease booking, and wagon booking options. Reliable and cost-effective for heavy and bulk shipments.",
     icon: "Train",
     features: [
       "Pan-India train cargo coverage",
@@ -61,7 +72,8 @@ export const services: Service[] = [
   {
     id: "express-delivery",
     title: "Express Delivery",
-    description: "Premium door-to-door day-definite delivery service for time-bound commercial shipments. Fastest delivery solution requiring regulatory clearances or special handling.",
+    description:
+      "Premium door-to-door day-definite delivery service for time-bound commercial shipments. Fastest delivery solution requiring regulatory clearances or special handling.",
     icon: "Zap",
     features: [
       "Day-definite delivery guarantee",
@@ -77,7 +89,8 @@ export const services: Service[] = [
   {
     id: "document-delivery",
     title: "Document Delivery",
-    description: "Secure and non-secure document delivery services across India. Specialized handling for confidential documents, legal papers, and business correspondence.",
+    description:
+      "Secure and non-secure document delivery services across India. Specialized handling for confidential documents, legal papers, and business correspondence.",
     icon: "FileText",
     features: [
       "Secured & Non-secured document options",
@@ -93,7 +106,8 @@ export const services: Service[] = [
   {
     id: "warehousing",
     title: "Warehousing & Storage",
-    description: "State-of-the-art warehousing solutions with inventory management, order fulfillment, and distribution services. Strategic locations across major Indian cities.",
+    description:
+      "State-of-the-art warehousing solutions with inventory management, order fulfillment, and distribution services. Strategic locations across major Indian cities.",
     icon: "Warehouse",
     features: [
       "Strategic warehouse locations",
@@ -106,7 +120,7 @@ export const services: Service[] = [
     image: "/images/warehouse.jpg",
     price_starting: "₹15/sq.ft/month",
   },
-]
+];
 
 export const testimonials: Testimonial[] = [
   {
@@ -114,7 +128,8 @@ export const testimonials: Testimonial[] = [
     name: "Rajesh Kumar",
     company: "Tech Solutions India",
     role: "Operations Director",
-    content: "RD Trade Network has transformed our supply chain operations. Their air cargo service is impeccable - we've reduced delivery times by 40% for our critical shipments. The real-time tracking gives us complete visibility.",
+    content:
+      "RD Trade Network has transformed our supply chain operations. Their air cargo service is impeccable - we've reduced delivery times by 40% for our critical shipments. The real-time tracking gives us complete visibility.",
     rating: 5,
     image: "/images/testimonial-1.jpg",
   },
@@ -123,7 +138,8 @@ export const testimonials: Testimonial[] = [
     name: "Priya Sharma",
     company: "Global Exports Ltd",
     role: "Logistics Manager",
-    content: "We've been working with RD Trade Network for 5 years now. Their rail cargo services have been a game-changer for our bulk shipments. Cost-effective, reliable, and their team is always responsive.",
+    content:
+      "We've been working with RD Trade Network for 5 years now. Their rail cargo services have been a game-changer for our bulk shipments. Cost-effective, reliable, and their team is always responsive.",
     rating: 5,
     image: "/images/testimonial-2.jpg",
   },
@@ -132,7 +148,8 @@ export const testimonials: Testimonial[] = [
     name: "Amit Patel",
     company: "PharmaCare Industries",
     role: "Supply Chain Head",
-    content: "The temperature-controlled warehousing and express delivery services from RD Trade Network have been crucial for our pharmaceutical products. Their attention to detail and compliance is outstanding.",
+    content:
+      "The temperature-controlled warehousing and express delivery services from RD Trade Network have been crucial for our pharmaceutical products. Their attention to detail and compliance is outstanding.",
     rating: 5,
     image: "/images/testimonial-3.jpg",
   },
@@ -141,11 +158,12 @@ export const testimonials: Testimonial[] = [
     name: "Sneha Gupta",
     company: "E-Commerce Ventures",
     role: "CEO",
-    content: "As an e-commerce company, we need reliable last-mile delivery. RD Trade Network's surface transport covers even the remotest pin codes in India. Their NDR management and RTO handling is excellent.",
+    content:
+      "As an e-commerce company, we need reliable last-mile delivery. RD Trade Network's surface transport covers even the remotest pin codes in India. Their NDR management and RTO handling is excellent.",
     rating: 5,
     image: "/images/testimonial-4.jpg",
   },
-]
+];
 
 export const directors: Director[] = [
   {
@@ -166,50 +184,58 @@ export const directors: Director[] = [
     image: "/images/director-seema.jpg",
     bio: "Seema Singh oversees customer relations and business development at RD Trade Network. Her focus on customized service delivery and client satisfaction has helped the company maintain long-term relationships with over 50,000 satisfied clients across India.",
   },
-]
+];
 
 export const milestones: Milestone[] = [
   {
-    year: "2008",
+    year: "2021",
     title: "Company Founded",
-    description: "RD Trade Network Pvt. Ltd. was established with a vision to provide comprehensive logistics solutions across India.",
+    description:
+      "RD Trade Network Pvt. Ltd. was established with a vision to provide comprehensive logistics solutions across India.",
   },
   {
-    year: "2010",
+    year: "2022",
     title: "Pan-India Expansion",
-    description: "Expanded operations to cover all major cities in India, establishing partnerships with leading courier brands.",
-  },
-  {
-    year: "2012",
-    title: "Air Cargo Launch",
-    description: "Launched air cargo services with tie-ups with commercial airlines, enabling same-day and next-day deliveries.",
-  },
-  {
-    year: "2015",
-    title: "Rail Cargo Integration",
-    description: "Added comprehensive rail cargo services with RR booking and wagon leasing options for bulk transport.",
-  },
-  {
-    year: "2018",
-    title: "Technology Upgrade",
-    description: "Implemented real-time tracking systems and digital proof of delivery across all services.",
-  },
-  {
-    year: "2020",
-    title: "21,000+ Pin Codes",
-    description: "Achieved coverage of 21,000+ pin codes across India, becoming one of the most extensive logistics networks.",
+    description:
+      "Expanded operations to cover all major cities in India, establishing partnerships with leading courier brands.",
   },
   {
     year: "2023",
-    title: "Digital Transformation",
-    description: "Launched comprehensive digital platform with online booking, tracking, and customer dashboard.",
+    title: "Air Cargo Launch",
+    description:
+      "Launched air cargo services with tie-ups with commercial airlines, enabling same-day and next-day deliveries.",
   },
   {
     year: "2024",
-    title: "Industry Leadership",
-    description: "Recognized as a leading logistics provider with 99.8% delivery success rate and 50,000+ happy clients.",
+    title: "Rail Cargo Integration",
+    description:
+      "Added comprehensive rail cargo services with RR booking and wagon leasing options for bulk transport.",
   },
-]
+  {
+    year: "2024",
+    title: "Technology Upgrade",
+    description:
+      "Implemented real-time tracking systems and digital proof of delivery across all services.",
+  },
+  {
+    year: "2024",
+    title: "21,000+ Pin Codes",
+    description:
+      "Achieved coverage of 21,000+ pin codes across India, becoming one of the most extensive logistics networks.",
+  },
+  {
+    year: "2026",
+    title: "Digital Transformation",
+    description:
+      "Launched comprehensive digital platform with online booking, tracking, and customer dashboard.",
+  },
+  {
+    year: "2026",
+    title: "Industry Leadership",
+    description:
+      "Recognized as a leading logistics provider with 99.8% delivery success rate and 50,000+ happy clients.",
+  },
+];
 
 export const mockShipments: Shipment[] = [
   {
@@ -333,23 +359,114 @@ export const mockShipments: Shipment[] = [
       },
     ],
   },
-]
+];
 
 export const mockPincodes: PincodeService[] = [
-  { pincode: "110001", city: "New Delhi", state: "Delhi", available: true, services: ["air", "surface", "rail", "express"], estimated_days: 1 },
-  { pincode: "400001", city: "Mumbai", state: "Maharashtra", available: true, services: ["air", "surface", "rail", "express"], estimated_days: 1 },
-  { pincode: "560001", city: "Bangalore", state: "Karnataka", available: true, services: ["air", "surface", "rail", "express"], estimated_days: 1 },
-  { pincode: "600001", city: "Chennai", state: "Tamil Nadu", available: true, services: ["air", "surface", "rail", "express"], estimated_days: 1 },
-  { pincode: "700001", city: "Kolkata", state: "West Bengal", available: true, services: ["air", "surface", "rail", "express"], estimated_days: 2 },
-  { pincode: "411001", city: "Pune", state: "Maharashtra", available: true, services: ["air", "surface", "rail", "express"], estimated_days: 1 },
-  { pincode: "500001", city: "Hyderabad", state: "Telangana", available: true, services: ["air", "surface", "rail", "express"], estimated_days: 1 },
-  { pincode: "380001", city: "Ahmedabad", state: "Gujarat", available: true, services: ["air", "surface", "rail", "express"], estimated_days: 2 },
-  { pincode: "302001", city: "Jaipur", state: "Rajasthan", available: true, services: ["air", "surface", "rail"], estimated_days: 2 },
-  { pincode: "226001", city: "Lucknow", state: "Uttar Pradesh", available: true, services: ["air", "surface", "rail"], estimated_days: 2 },
-  { pincode: "160001", city: "Chandigarh", state: "Chandigarh", available: true, services: ["air", "surface", "rail"], estimated_days: 2 },
-  { pincode: "141001", city: "Ludhiana", state: "Punjab", available: true, services: ["air", "surface", "rail"], estimated_days: 2 },
-  { pincode: "999999", city: "Unknown", state: "Unknown", available: false, services: [], estimated_days: 0 },
-]
+  {
+    pincode: "110001",
+    city: "New Delhi",
+    state: "Delhi",
+    available: true,
+    services: ["air", "surface", "rail", "express"],
+    estimated_days: 1,
+  },
+  {
+    pincode: "400001",
+    city: "Mumbai",
+    state: "Maharashtra",
+    available: true,
+    services: ["air", "surface", "rail", "express"],
+    estimated_days: 1,
+  },
+  {
+    pincode: "560001",
+    city: "Bangalore",
+    state: "Karnataka",
+    available: true,
+    services: ["air", "surface", "rail", "express"],
+    estimated_days: 1,
+  },
+  {
+    pincode: "600001",
+    city: "Chennai",
+    state: "Tamil Nadu",
+    available: true,
+    services: ["air", "surface", "rail", "express"],
+    estimated_days: 1,
+  },
+  {
+    pincode: "700001",
+    city: "Kolkata",
+    state: "West Bengal",
+    available: true,
+    services: ["air", "surface", "rail", "express"],
+    estimated_days: 2,
+  },
+  {
+    pincode: "411001",
+    city: "Pune",
+    state: "Maharashtra",
+    available: true,
+    services: ["air", "surface", "rail", "express"],
+    estimated_days: 1,
+  },
+  {
+    pincode: "500001",
+    city: "Hyderabad",
+    state: "Telangana",
+    available: true,
+    services: ["air", "surface", "rail", "express"],
+    estimated_days: 1,
+  },
+  {
+    pincode: "380001",
+    city: "Ahmedabad",
+    state: "Gujarat",
+    available: true,
+    services: ["air", "surface", "rail", "express"],
+    estimated_days: 2,
+  },
+  {
+    pincode: "302001",
+    city: "Jaipur",
+    state: "Rajasthan",
+    available: true,
+    services: ["air", "surface", "rail"],
+    estimated_days: 2,
+  },
+  {
+    pincode: "226001",
+    city: "Lucknow",
+    state: "Uttar Pradesh",
+    available: true,
+    services: ["air", "surface", "rail"],
+    estimated_days: 2,
+  },
+  {
+    pincode: "160001",
+    city: "Chandigarh",
+    state: "Chandigarh",
+    available: true,
+    services: ["air", "surface", "rail"],
+    estimated_days: 2,
+  },
+  {
+    pincode: "141001",
+    city: "Ludhiana",
+    state: "Punjab",
+    available: true,
+    services: ["air", "surface", "rail"],
+    estimated_days: 2,
+  },
+  {
+    pincode: "999999",
+    city: "Unknown",
+    state: "Unknown",
+    available: false,
+    services: [],
+    estimated_days: 0,
+  },
+];
 
 export const clients = [
   "Tech Solutions India",
@@ -360,4 +477,4 @@ export const clients = [
   "Retail Chain Ltd",
   "ABC Enterprises",
   "XYZ Corp",
-]
+];
