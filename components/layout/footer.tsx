@@ -130,13 +130,13 @@ export function Footer() {
                 +91 98889 23612 &nbsp;/&nbsp; +91 77175 29232
               </a>
               <a
-                href="mailto:rakesh@rdtradenetwork.in"
+                href="mailto:info@rdtradenetwork.in"
                 className="flex items-center gap-3 text-sm text-white/50 hover:text-orange-400 transition-colors duration-200 group"
               >
                 <div className="p-1.5 bg-orange-500/10 rounded-lg group-hover:bg-orange-500/20 transition-colors shrink-0">
                   <Mail className="h-3.5 w-3.5 text-orange-400" />
                 </div>
-                rakesh@rdtradenetwork.in
+                info@rdtradenetwork.in
               </a>
               <div className="flex items-start gap-3 text-sm text-white/50">
                 <div className="p-1.5 bg-orange-500/10 rounded-lg shrink-0 mt-0.5">

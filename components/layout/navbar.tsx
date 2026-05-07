@@ -68,11 +68,11 @@ export function Navbar() {
               +91 98889 23612
             </a>
             <a
-              href="mailto:rakesh@rdtradenetwork.in"
+              href="mailto:info@rdtradenetwork.in"
               className="flex items-center gap-1.5 text-white/60 hover:text-orange-400 transition-colors duration-200"
             >
               <Mail className="h-3 w-3" />
-              rakesh@rdtradenetwork.in
+              info@rdtradenetwork.in
             </a>
           </div>
           <div className="flex items-center gap-5">
