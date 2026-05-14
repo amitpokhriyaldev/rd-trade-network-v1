@@ -1,127 +1,80 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mockPincodes } from "@/data/mock-data";
 
-// Provider pool — add/remove as needed
-const providerPool = [
-  {
-    name: "Delhivery",
-    type: "B2B",
-    plan: "Delhivery 6-CFT",
-    odaChance: 0.2,
-  },
-  {
-    name: "Delhivery",
-    type: "B2B",
-    plan: "Delhivery 10-CFT",
-    odaChance: 0.2,
-  },
-  {
-    name: "Delhivery",
-    type: "B2C",
-    plan: "Express 0.5, 10KG, 20KG & 60KG",
-    odaChance: 0.3,
-  },
-  {
-    name: "XpressBees",
-    type: "B2C",
-    plan: "Standard 0.5KG – 10KG",
-    odaChance: 0.4,
-  },
-  {
-    name: "XpressBees",
-    type: "B2B",
-    plan: "Freight Forward 50KG+",
-    odaChance: 0.5,
-  },
-  {
-    name: "BlueDart",
-    type: "B2C",
-    plan: "Priority Overnight",
-    odaChance: 0.15,
-  },
-  {
-    name: "BlueDart",
-    type: "B2B",
-    plan: "Dart Apex (Air)",
-    odaChance: 0.1,
-  },
-  {
-    name: "DTDC",
-    type: "B2C",
-    plan: "Express Parcel 2KG",
-    odaChance: 0.35,
-  },
-  {
-    name: "DTDC",
-    type: "B2B",
-    plan: "Air Express Cargo",
-    odaChance: 0.3,
-  },
-  {
-    name: "Ekart",
-    type: "B2C",
-    plan: "Standard Delivery",
-    odaChance: 0.45,
-  },
-];
+const SHEET_ID = "1sWzXIveLRJUBnyCYcWb7m6F4J2TdMS9NOaFoTzD3Zi8";
+const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
-// Hub centers per state
-const stateCenters: Record<string, string[]> = {
-  Delhi: [
-    "Delhi_Okhla_L (Delhi)",
-    "Delhi_Rohini_L (Delhi)",
-    "Delhi_Dwarka_H (Delhi)",
-  ],
-  Maharashtra: [
-    "Mumbai_Andheri_L (Maharashtra)",
-    "Mumbai_Thane_L (Maharashtra)",
-    "Pune_Hadapsar_H (Maharashtra)",
-  ],
-  Karnataka: [
-    "Bangalore_Whitefield_L (Karnataka)",
-    "Bangalore_Hebbal_H (Karnataka)",
-  ],
-  "Tamil Nadu": [
-    "Chennai_Vadaperumbakkam_L (Tamil Nadu)",
-    "Chennai_Royapettah1_C (Tamil Nadu)",
-  ],
-  "West Bengal": [
-    "Kolkata_Howrah_L (West Bengal)",
-    "Kolkata_Saltlake_H (West Bengal)",
-  ],
-  Telangana: [
-    "Hyderabad_Gachibowli_L (Telangana)",
-    "Hyderabad_Secunderabad_H (Telangana)",
-  ],
-  Gujarat: ["Ahmedabad_Naroda_L (Gujarat)", "Ahmedabad_Vatva_H (Gujarat)"],
-  Rajasthan: [
-    "Jaipur_Sitapura_L (Rajasthan)",
-    "Jaipur_Mansarovar_H (Rajasthan)",
-  ],
-  "Uttar Pradesh": [
-    "Lucknow_Amausi_L (Uttar Pradesh)",
-    "Lucknow_Gomtinagar_H (Uttar Pradesh)",
-  ],
-};
-
-// Seeded pseudo-random (deterministic per pincode so results don't change on refresh)
-function seededRandom(seed: number) {
-  const x = Math.sin(seed + 1) * 10000;
-  return x - Math.floor(x);
+interface SheetRow {
+  pincode: string;
+  dispatchCenter: string;
+  originCenter: string;
+  city: string;
+  state: string;
+  isODA: boolean;
 }
 
-const cities = [
-  { city: "New Delhi", state: "Delhi" },
-  { city: "Mumbai", state: "Maharashtra" },
-  { city: "Bangalore", state: "Karnataka" },
-  { city: "Chennai", state: "Tamil Nadu" },
-  { city: "Kolkata", state: "West Bengal" },
-  { city: "Hyderabad", state: "Telangana" },
-  { city: "Pune", state: "Maharashtra" },
-  { city: "Ahmedabad", state: "Gujarat" },
-  { city: "Jaipur", state: "Rajasthan" },
-  { city: "Lucknow", state: "Uttar Pradesh" },
-];
+let cachedRows: SheetRow[] | null = null;
+let cacheTimestamp = 0;
+
+// Simple CSV parser that handles quoted fields
+function parseCSV(text: string): string[][] {
+  const rows: string[][] = [];
+  const lines = text.split(/\r?\n/);
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    const cols: string[] = [];
+    let inQuotes = false;
+    let current = "";
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        inQuotes = !inQuotes;
+      } else if (ch === "," && !inQuotes) {
+        cols.push(current.trim());
+        current = "";
+      } else {
+        current += ch;
+      }
+    }
+    cols.push(current.trim());
+    rows.push(cols);
+  }
+  return rows;
+}
+
+async function getSheetData(): Promise<SheetRow[]> {
+  const now = Date.now();
+  if (cachedRows && now - cacheTimestamp < CACHE_TTL_MS) {
+    return cachedRows;
+  }
+
+  const response = await fetch(SHEET_CSV_URL, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`Google Sheets fetch failed: ${response.status}`);
+  }
+
+  const text = await response.text();
+  const rows = parseCSV(text);
+
+  // Skip header row; columns: [0] Sr No, [1] Pincode, [2] Dispatch Center,
+  // [3] Origin Center, [4] Facility City, [5] Facility State, [6] ODA
+  const data: SheetRow[] = rows
+    .slice(1)
+    .map((cols) => ({
+      pincode: String(cols[1] ?? "").trim().padStart(6, "0"),
+      dispatchCenter: String(cols[2] ?? "").trim(),
+      originCenter: String(cols[3] ?? "").trim(),
+      city: String(cols[4] ?? "").trim(),
+      state: String(cols[5] ?? "").trim(),
+      // Column G: "NORMAL SERVICE" → not ODA, "ODA" → is ODA
+      isODA: String(cols[6] ?? "").trim().toUpperCase() === "ODA",
+    }))
+    .filter((row) => /^\d{6}$/.test(row.pincode));
+
+  cachedRows = data;
+  cacheTimestamp = now;
+  return data;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -129,79 +82,51 @@ export async function GET(request: NextRequest) {
     const pincode = searchParams.get("pincode");
 
     if (!pincode) {
-      return NextResponse.json(
-        { error: "Pincode is required" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Pincode is required" }, { status: 400 });
     }
 
     if (!/^\d{6}$/.test(pincode)) {
       return NextResponse.json(
         { error: "Invalid pincode format. Must be 6 digits." },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
-    // Check mock data first
-    const mockService = mockPincodes.find((p) => p.pincode === pincode);
-    if (mockService) {
-      return NextResponse.json({ success: true, service: mockService });
+    const sheetData = await getSheetData();
+    const match = sheetData.find((row) => row.pincode === pincode);
+
+    if (!match) {
+      return NextResponse.json({
+        success: true,
+        service: {
+          pincode,
+          city: "",
+          state: "",
+          available: false,
+          services: [],
+          estimated_days: 0,
+        },
+      });
     }
-
-    // Deterministic city selection
-    const pincodeNum = parseInt(pincode);
-    const cityIndex = parseInt(pincode.slice(-2)) % cities.length;
-    const selected = cities[cityIndex];
-
-    // Deterministically pick 4–7 providers from the pool
-    const providerCount = 4 + (pincodeNum % 4); // 4–7
-    const centers = stateCenters[selected.state] ?? [
-      `${selected.city}_Hub_L (${selected.state})`,
-      `${selected.city}_Hub_H (${selected.state})`,
-    ];
-
-    const providers = providerPool.slice(0, providerCount).map((p, i) => {
-      const rand1 = seededRandom(pincodeNum + i * 7);
-      const rand2 = seededRandom(pincodeNum + i * 13);
-      const centerIndex = Math.floor(rand1 * centers.length);
-
-      // XpressBees gets N/A center for the last entry (like your screenshot)
-      const isLastXpress = p.name === "XpressBees" && i === providerCount - 1;
-      const center = isLastXpress ? "N/A" : centers[centerIndex];
-
-      // Most providers serviceable; last 1-2 may not be (like your screenshot)
-      const serviceable = i < providerCount - 1 ? true : rand1 > 0.5;
-      const oda = serviceable ? rand2 < p.odaChance : false;
-
-      return {
-        name: p.name,
-        type: p.type,
-        plan: p.plan,
-        center,
-        serviceable,
-        oda,
-      };
-    });
-
-    // Estimated days — deterministic
-    const estimatedDays = 1 + (pincodeNum % 3);
 
     return NextResponse.json({
       success: true,
       service: {
         pincode,
-        city: selected.city,
-        state: selected.state,
+        city: match.city,
+        state: match.state,
         available: true,
-        services: ["air", "surface", "rail", "express"],
-        estimated_days: estimatedDays,
-        providers, // ← new field consumed by the table UI
+        services: [],
+        estimated_days: 2,
+        dispatchCenter: match.dispatchCenter,
+        isODA: match.isODA,
       },
     });
   } catch (error) {
+    console.error("Pincode check error:", error);
     return NextResponse.json(
-      { error: "Failed to check pincode serviceability" },
-      { status: 500 },
+      { error: "Failed to check pincode serviceability. Please try again." },
+      { status: 500 }
     );
   }
 }

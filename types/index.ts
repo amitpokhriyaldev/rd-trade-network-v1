@@ -93,6 +93,8 @@ export interface PincodeService {
   available: boolean
   services: string[]
   estimated_days: number
+  dispatchCenter?: string
+  isODA?: boolean
 }
 
 export interface ContactFormData {

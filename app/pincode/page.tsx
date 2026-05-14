@@ -7,63 +7,17 @@ import {
   MapPin,
   CheckCircle2,
   XCircle,
-  Truck,
-  Plane,
-  Train,
-  Zap,
-  Clock,
   ArrowRight,
-  Package,
   Building2,
 } from "lucide-react";
 import { AnimatedSection } from "@/components/sections/animated-section";
 import { PincodeService } from "@/types";
 import Link from "next/link";
-import toast from "react-hot-toast";
-
-// Mock provider rows that would come from your API
-// Your API should return result.providers array of this shape
-interface ProviderRow {
-  name: string; // e.g. "Delhivery"
-  type: string; // e.g. "B2B" | "B2C"
-  plan: string; // e.g. "Delhivery 6-CFT"
-  center: string; // e.g. "Chennai_Vadaperumbakkam_L (Tamil Nadu)"
-  serviceable: boolean;
-  oda: boolean;
-}
-
-const serviceIcons: Record<string, React.ElementType> = {
-  air: Plane,
-  surface: Truck,
-  rail: Train,
-  express: Zap,
-};
-
-const serviceLabels: Record<string, string> = {
-  air: "Air Cargo",
-  surface: "Surface",
-  rail: "Rail Cargo",
-  express: "Express",
-};
-
-// Provider logo fallback (text badge style)
-function ProviderBadge({ name, type }: { name: string; type: string }) {
-  const colors: Record<string, string> = {
-    Delhivery: "text-[#e00]-",
-    XpressBees: "text-yellow-600",
-    BlueDart: "text-blue-700",
-    DTDC: "text-red-700",
-    Ekart: "text-blue-600",
-  };
-  return (
-    <div>
-      <span className="font-black text-sm tracking-tight text-[#0a1628] uppercase">
-        {name}
-      </span>
-      <span className="ml-1 text-xs font-bold text-slate-400">{type}</span>
-    </div>
-  );
-}
+const FIXED_SERVICES = [
+  { name: "DELHIVERY", type: "B2B", plan: "6-CFT" },
+  { name: "DELHIVERY", type: "B2B", plan: "10-CFT" },
+  { name: "DELHIVERY", type: "B2C", plan: "Express 0.5, 10KG, 20KG & 60KG" },
+];
 
 export default function PincodePage() {
   const [pincode, setPincode] = useState("");
@@ -73,28 +27,20 @@ export default function PincodePage() {
   const handleCheck = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!pincode.trim() || pincode.length !== 6) {
-      toast.error("Please enter a valid 6-digit PIN code");
       return;
     }
     setIsLoading(true);
     setResult(null);
     try {
       const response = await fetch(
-        `/api/pincode?pincode=${encodeURIComponent(pincode)}`,
+        `/api/pincode?pincode=${encodeURIComponent(pincode)}`
       );
       const data = await response.json();
       if (data.service) {
         setResult(data.service);
-        if (data.service.available) {
-          toast.success(`Service available in ${data.service.city}!`);
-        } else {
-          toast.error("Service not available in this area yet");
-        }
-      } else {
-        toast.error("Could not check serviceability. Please try again.");
       }
     } catch {
-      toast.error("Failed to check pincode. Please try again.");
+      // silently fail — result remains null, UI shows nothing
     } finally {
       setIsLoading(false);
     }
@@ -166,7 +112,7 @@ export default function PincodePage() {
         />
 
         <div className="container mx-auto px-4 relative z-10 mt-14">
-          {/* Search Card — floating overlap */}
+          {/* Search Card */}
           <AnimatedSection>
             <div className="max-w-2xl mx-auto -mt-10 mb-10">
               <div className="relative bg-white border border-slate-200/80 rounded-3xl p-6 lg:p-8 shadow-[0_8px_40px_oklch(0.2_0.01_80/0.10)] overflow-hidden">
@@ -206,17 +152,7 @@ export default function PincodePage() {
                 </form>
 
                 <p className="text-xs text-slate-400 text-center mt-4">
-                  Try demo PINs:{" "}
-                  {["110001", "400001", "560001"].map((pin, i) => (
-                    <button
-                      key={pin}
-                      onClick={() => setPincode(pin)}
-                      className="text-orange-500 font-semibold hover:text-orange-600 transition-colors"
-                    >
-                      {pin}
-                      {i < 2 ? ", " : ""}
-                    </button>
-                  ))}
+                  Enter a 6-digit Indian PIN code to check logistics coverage
                 </p>
               </div>
             </div>
@@ -252,10 +188,8 @@ export default function PincodePage() {
                       </div>
                     </motion.div>
 
-                    {/* Provider Table — like the reference image */}
+                    {/* Results Table */}
                     <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-[0_4px_24px_oklch(0.2_0.01_80/0.07)]">
-                      <div className="absolute top-0 left-12 right-12 h-0.5 bg-gradient-to-r from-transparent via-orange-400 to-transparent rounded-full" />
-
                       {/* Table Header */}
                       <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-slate-50 border-b border-slate-100">
                         <div className="col-span-4">
@@ -280,105 +214,81 @@ export default function PincodePage() {
                         </div>
                       </div>
 
-                      {/* Provider Rows — generated from result.providers or fallback to services */}
-                      {result.services
-                        .map((s: string) => ({
-                          name: "RD Trade Network",
-                          type: "B2B",
-                          plan: serviceLabels[s] ?? s,
-                          center: `${result.city} Hub (${result.state})`,
-                          serviceable: true,
-                          oda: false,
-                        }))
-                        .map((provider: ProviderRow, i: number) => (
-                          <motion.div
-                            key={i}
-                            initial={{ opacity: 0, x: -12 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.15 + i * 0.07 }}
-                            className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-slate-100 last:border-0 hover:bg-slate-50/60 transition-colors duration-150 group"
-                          >
-                            {/* Provider name + plan */}
-                            <div className="col-span-4">
-                              <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-lg bg-[#0a1628]/8 flex items-center justify-center shrink-0">
-                                  <Truck className="h-3.5 w-3.5 text-[#0a1628]/40" />
-                                </div>
-                                <div>
-                                  <div className="flex items-baseline gap-1">
-                                    <span className="text-sm font-black text-[#0a1628] uppercase tracking-tight">
-                                      {provider.name}
-                                    </span>
-                                    <span className="text-xs font-bold text-slate-400">
-                                      {provider.type}
-                                    </span>
-                                  </div>
-                                  <p className="text-xs text-slate-400 mt-0.5">
-                                    {provider.plan}
-                                  </p>
-                                </div>
+                      {/* 3 Fixed Service Rows */}
+                      {FIXED_SERVICES.map((svc, i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, x: -12 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.15 + i * 0.07 }}
+                          className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-slate-100 last:border-0 hover:bg-slate-50/60 transition-colors duration-150"
+                        >
+                          {/* Col 1: Service Provider (fixed) */}
+                          <div className="col-span-4 flex items-center gap-2.5">
+                            <div className="w-7 h-7 rounded-lg bg-[#0a1628]/8 flex items-center justify-center shrink-0">
+                              <Building2 className="h-3.5 w-3.5 text-[#0a1628]/40" />
+                            </div>
+                            <div>
+                              <div className="flex items-baseline gap-1">
+                                <span className="text-sm font-black text-[#0a1628] uppercase tracking-tight">
+                                  {svc.name}
+                                </span>
+                                <span className="text-xs font-bold text-slate-400">
+                                  {svc.type}
+                                </span>
                               </div>
+                              <p className="text-xs text-slate-400 mt-0.5">
+                                {svc.plan}
+                              </p>
                             </div>
+                          </div>
 
-                            {/* Center */}
-                            <div className="col-span-4 flex items-center">
-                              <div className="flex items-start gap-1.5">
-                                <Building2 className="h-3.5 w-3.5 text-slate-300 mt-0.5 shrink-0" />
-                                <p className="text-sm text-slate-500 leading-snug">
-                                  {provider.center}
-                                </p>
+                          {/* Col 2: Dispatch Center (from sheet column C) */}
+                          <div className="col-span-4 flex items-center gap-1.5">
+                            <MapPin className="h-3.5 w-3.5 text-slate-300 shrink-0" />
+                            <p className="text-sm text-slate-500 leading-snug">
+                              {result.dispatchCenter || "—"}
+                            </p>
+                          </div>
+
+                          {/* Col 3: Serviceability — green if NORMAL SERVICE, red if ODA */}
+                          <div className="col-span-2 flex items-center justify-center">
+                            {!result.isODA ? (
+                              <div className="flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full">
+                                <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                               </div>
-                            </div>
+                            ) : (
+                              <div className="flex items-center justify-center w-8 h-8 bg-red-100 rounded-full">
+                                <XCircle className="h-5 w-5 text-red-500" />
+                              </div>
+                            )}
+                          </div>
 
-                            {/* Serviceability */}
-                            <div className="col-span-2 flex items-center justify-center">
-                              {provider.serviceable ? (
-                                <div className="flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full">
-                                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                                </div>
-                              ) : (
-                                <div className="flex items-center justify-center w-8 h-8 bg-red-100 rounded-full">
-                                  <XCircle className="h-5 w-5 text-red-500" />
-                                </div>
-                              )}
+                          {/* Col 4: ODA — always red cross */}
+                          <div className="col-span-2 flex items-center justify-center">
+                            <div className="flex items-center justify-center w-8 h-8 bg-red-100 rounded-full">
+                              <XCircle className="h-5 w-5 text-red-500" />
                             </div>
-
-                            {/* ODA */}
-                            <div className="col-span-2 flex items-center justify-center">
-                              {provider.oda ? (
-                                <div className="flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full">
-                                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                                </div>
-                              ) : (
-                                <div className="flex items-center justify-center w-8 h-8 bg-red-100 rounded-full">
-                                  <XCircle className="h-5 w-5 text-red-500" />
-                                </div>
-                              )}
-                            </div>
-                          </motion.div>
-                        ))}
+                          </div>
+                        </motion.div>
+                      ))}
                     </div>
 
-                    {/* Legend + Note */}
-                    <div className="flex items-start gap-6 mt-4 px-1">
-                      <div className="flex items-center gap-4 text-xs text-slate-400">
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-4 h-4 bg-emerald-100 rounded-full flex items-center justify-center">
-                            <CheckCircle2 className="h-2.5 w-2.5 text-emerald-500" />
-                          </div>
-                          Available
+                    {/* Legend */}
+                    <div className="flex items-center gap-6 mt-4 px-1 text-xs text-slate-400">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-4 h-4 bg-emerald-100 rounded-full flex items-center justify-center">
+                          <CheckCircle2 className="h-2.5 w-2.5 text-emerald-500" />
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center">
-                            <XCircle className="h-2.5 w-2.5 text-red-500" />
-                          </div>
-                          Not Available
-                        </div>
-                        <span className="font-semibold text-slate-500">
-                          ODA
-                        </span>
-                        <span>= Out of Delivery Area</span>
+                        Available
                       </div>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center">
+                          <XCircle className="h-2.5 w-2.5 text-red-500" />
+                        </div>
+                        Not Available
+                      </div>
+                      <span>ODA = Out of Delivery Area</span>
                     </div>
 
                     {/* CTA Buttons */}
@@ -406,11 +316,11 @@ export default function PincodePage() {
                       Service Not Available
                     </h3>
                     <p className="text-slate-500 text-sm max-w-sm mx-auto mb-2">
-                      {result.city}, {result.state} — PIN: {result.pincode}
+                      PIN: {result.pincode}
                     </p>
                     <p className="text-slate-500 text-sm max-w-sm mx-auto mb-6">
-                      We don't serve this location yet, but we're constantly
-                      expanding our network.
+                      We don&apos;t serve this location yet, but we&apos;re
+                      constantly expanding our network.
                     </p>
                     <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6 max-w-sm mx-auto text-left">
                       <p className="text-sm text-orange-700">
