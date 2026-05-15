@@ -16,8 +16,6 @@ import {
 import { AnimatedSection } from "@/components/sections/animated-section";
 import { useTrackingStore } from "@/lib/store";
 import { Shipment, ShipmentStatus } from "@/types";
-import toast from "react-hot-toast";
-
 const statusConfig: Record<
   ShipmentStatus,
   {
@@ -121,10 +119,7 @@ export default function TrackContent() {
 
   const handleTrack = async (id?: string) => {
     const trackId = id || trackingId;
-    if (!trackId.trim()) {
-      toast.error("Please enter a tracking ID");
-      return;
-    }
+    if (!trackId.trim()) return;
     setIsLoading(true);
     setShipment(null);
     try {
@@ -135,12 +130,9 @@ export default function TrackContent() {
       if (data.shipment) {
         setShipment(data.shipment);
         addToHistory(data.shipment);
-        toast.success("Shipment found!");
-      } else {
-        toast.error("No shipment found with this tracking ID");
       }
     } catch {
-      toast.error("Failed to track shipment. Please try again.");
+      // silently fail — result remains null, UI shows not-found state
     } finally {
       setIsLoading(false);
     }
@@ -338,73 +330,78 @@ export default function TrackContent() {
                 <div className="bg-white border border-slate-200/80 rounded-2xl p-6 lg:p-8 shadow-[0_4px_24px_oklch(0.2_0.01_80/0.07)] overflow-hidden relative">
                   <div className="absolute top-0 left-12 right-12 h-0.5 bg-gradient-to-r from-transparent via-orange-400 to-transparent rounded-full" />
 
-                  {/* From → To */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                      <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-                        From
-                      </p>
-                      <p className="font-bold text-[#0a1628]">
-                        {shipment.sender_name}
-                      </p>
-                      <p className="text-sm text-slate-500 mt-1">
-                        {shipment.sender_address}
-                      </p>
-                      <p className="text-xs text-orange-500 font-medium mt-1">
-                        PIN: {shipment.sender_pincode}
-                      </p>
-                    </div>
+                  {/* From → To — only shown when sender/receiver data is available */}
+                  {shipment.sender_name && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                      <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                        <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                          From
+                        </p>
+                        <p className="font-bold text-[#0a1628]">
+                          {shipment.sender_name}
+                        </p>
+                        <p className="text-sm text-slate-500 mt-1">
+                          {shipment.sender_address}
+                        </p>
+                        {shipment.sender_pincode && (
+                          <p className="text-xs text-orange-500 font-medium mt-1">
+                            PIN: {shipment.sender_pincode}
+                          </p>
+                        )}
+                      </div>
 
-                    <div className="flex items-center justify-center">
-                      <div className="flex items-center gap-2">
-                        <div className="h-px w-8 bg-slate-300 hidden md:block" />
-                        <div className="p-2.5 bg-orange-500/10 rounded-full">
-                          <ArrowRight className="h-5 w-5 text-orange-500 hidden md:block" />
-                          <ArrowRight className="h-5 w-5 text-orange-500 rotate-90 md:hidden" />
+                      <div className="flex items-center justify-center">
+                        <div className="flex items-center gap-2">
+                          <div className="h-px w-8 bg-slate-300 hidden md:block" />
+                          <div className="p-2.5 bg-orange-500/10 rounded-full">
+                            <ArrowRight className="h-5 w-5 text-orange-500 hidden md:block" />
+                            <ArrowRight className="h-5 w-5 text-orange-500 rotate-90 md:hidden" />
+                          </div>
+                          <div className="h-px w-8 bg-slate-300 hidden md:block" />
                         </div>
-                        <div className="h-px w-8 bg-slate-300 hidden md:block" />
+                      </div>
+
+                      <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                        <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                          To
+                        </p>
+                        <p className="font-bold text-[#0a1628]">
+                          {shipment.receiver_name}
+                        </p>
+                        <p className="text-sm text-slate-500 mt-1">
+                          {shipment.receiver_address}
+                        </p>
+                        {shipment.receiver_pincode && (
+                          <p className="text-xs text-orange-500 font-medium mt-1">
+                            PIN: {shipment.receiver_pincode}
+                          </p>
+                        )}
                       </div>
                     </div>
+                  )}
 
-                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                      <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-                        To
-                      </p>
-                      <p className="font-bold text-[#0a1628]">
-                        {shipment.receiver_name}
-                      </p>
-                      <p className="text-sm text-slate-500 mt-1">
-                        {shipment.receiver_address}
-                      </p>
-                      <p className="text-xs text-orange-500 font-medium mt-1">
-                        PIN: {shipment.receiver_pincode}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Details grid */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-slate-100">
+                  {/* Details grid — only non-empty values */}
+                  <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 ${shipment.sender_name ? "pt-6 border-t border-slate-100" : ""}`}>
                     {[
-                      { label: "Service", value: shipment.service_type },
-                      { label: "Weight", value: `${shipment.weight} kg` },
-                      { label: "Dimensions", value: shipment.dimensions },
-                      {
-                        label: "Est. Delivery",
-                        value: shipment.estimated_delivery,
-                      },
-                    ].map((item) => (
-                      <div
-                        key={item.label}
-                        className="bg-slate-50 rounded-xl p-3.5 border border-slate-100"
-                      >
-                        <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
-                          {item.label}
-                        </p>
-                        <p className="font-bold text-[#0a1628] text-sm capitalize">
-                          {item.value}
-                        </p>
-                      </div>
-                    ))}
+                      { label: "Current Location", value: shipment.current_location },
+                      { label: "Weight", value: shipment.weight > 0 ? `${shipment.weight} kg` : null },
+                      { label: "Est. Delivery", value: shipment.estimated_delivery || null },
+                      { label: "Delivered On", value: shipment.actual_delivery || null },
+                    ]
+                      .filter((item) => item.value)
+                      .map((item) => (
+                        <div
+                          key={item.label}
+                          className="bg-slate-50 rounded-xl p-3.5 border border-slate-100"
+                        >
+                          <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
+                            {item.label}
+                          </p>
+                          <p className="font-bold text-[#0a1628] text-sm">
+                            {item.value}
+                          </p>
+                        </div>
+                      ))}
                   </div>
                 </div>
               </div>
@@ -422,9 +419,9 @@ export default function TrackContent() {
                     {/* Vertical line */}
                     <div className="absolute left-4 top-0 bottom-0 w-px bg-gradient-to-b from-orange-400/60 via-slate-200 to-transparent" />
 
-                    {shipment.timeline.map((event, index) => {
+                    {[...shipment.timeline].reverse().map((event, index) => {
                       const evSt = statusConfig[event.status];
-                      const isLatest = index === shipment.timeline.length - 1;
+                      const isLatest = index === 0;
 
                       return (
                         <motion.div
@@ -511,60 +508,10 @@ export default function TrackContent() {
                 <h3 className="text-xl font-extrabold text-[#0a1628] mb-2">
                   Enter a Tracking ID
                 </h3>
-                <p className="text-slate-500 text-sm leading-relaxed mb-8 max-w-md mx-auto">
-                  Use your shipment tracking ID to get real-time updates. Try
-                  these demo IDs below:
+                <p className="text-slate-500 text-sm leading-relaxed max-w-md mx-auto">
+                  Enter your shipment tracking ID above to get real-time
+                  updates on your delivery status.
                 </p>
-
-                {/* Demo IDs */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {[
-                    {
-                      id: "RDTN8X2K9P4M",
-                      status: "In Transit",
-                      dot: "bg-amber-400",
-                      badge: "text-amber-600 bg-amber-50 border-amber-200",
-                    },
-                    {
-                      id: "RDTN5Y7L3Q9R",
-                      status: "Delivered",
-                      dot: "bg-emerald-400",
-                      badge:
-                        "text-emerald-600 bg-emerald-50 border-emerald-200",
-                    },
-                    {
-                      id: "RDTN2A4B6C8D",
-                      status: "Picked Up",
-                      dot: "bg-blue-400",
-                      badge: "text-blue-600 bg-blue-50 border-blue-200",
-                    },
-                  ].map((demo) => (
-                    <button
-                      key={demo.id}
-                      onClick={() => {
-                        setTrackingId(demo.id);
-                        handleTrack(demo.id);
-                      }}
-                      className="group relative bg-white border border-slate-200 hover:border-orange-300 rounded-2xl p-5 text-left transition-all duration-300 hover:shadow-[0_4px_24px_oklch(0.2_0.01_80/0.10)] overflow-hidden"
-                    >
-                      <div className="absolute top-0 left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-orange-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500 rounded-full" />
-                      <p className="font-mono text-sm font-bold text-[#0a1628] mb-2">
-                        {demo.id}
-                      </p>
-                      <div className="flex items-center gap-1.5">
-                        <div className={`h-2 w-2 rounded-full ${demo.dot}`} />
-                        <span
-                          className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${demo.badge}`}
-                        >
-                          {demo.status}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-400 mt-2 group-hover:text-orange-500 transition-colors flex items-center gap-1">
-                        Click to track <ArrowRight className="h-3 w-3" />
-                      </p>
-                    </button>
-                  ))}
-                </div>
               </div>
             </AnimatedSection>
           </div>
