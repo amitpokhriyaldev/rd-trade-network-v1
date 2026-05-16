@@ -359,7 +359,10 @@ export default function ContactPage() {
                       RD Trade Network Pvt. Ltd.
                     </p>
                     <p>Registered Office</p>
-                    <p>Plot NO. 141, Phase 2, Panchkula, Haryana, IN 134109</p>
+                    <p>
+                      Plot NO. 141, Industrial Area Phase 2, Panchkula, Haryana,
+                      IN 134113
+                    </p>
                   </div>
                 </div>
 

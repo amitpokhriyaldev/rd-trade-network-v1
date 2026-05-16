@@ -142,8 +142,8 @@ export function Footer() {
                 <div className="p-1.5 bg-orange-500/10 rounded-lg shrink-0 mt-0.5">
                   <MapPin className="h-3.5 w-3.5 text-orange-400" />
                 </div>
-                Registered Office: Plot NO. 141, Phase 2, Panchkula, Haryana, IN
-                134109
+                Registered Office: Plot NO. 141, Industrial Area Phase 2,
+                Panchkula, Haryana, IN 134113
               </div>
             </div>
           </div>
