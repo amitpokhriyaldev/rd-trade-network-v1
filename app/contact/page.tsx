@@ -15,17 +15,44 @@ import {
 import { AnimatedSection } from "@/components/sections/animated-section";
 import toast from "react-hot-toast";
 
+const emptyForm = {
+  name: "",
+  email: "",
+  phone: "",
+  company: "",
+  service: "",
+  message: "",
+};
+
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [formData, setFormData] = useState(emptyForm);
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => setFormData((prev) => ({ ...prev, [e.target.id]: e.target.value }));
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    toast.success("Message sent! We'll get back to you soon.");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) throw new Error("Failed");
+      setIsSubmitted(true);
+      setFormData(emptyForm);
+      toast.success("Message sent! We'll get back to you soon.");
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const inputClass =
@@ -228,6 +255,8 @@ export default function ContactPage() {
                               type="text"
                               placeholder="John Doe"
                               required
+                              value={formData.name}
+                              onChange={handleChange}
                               className={inputClass}
                             />
                           </div>
@@ -240,6 +269,8 @@ export default function ContactPage() {
                               type="email"
                               placeholder="john@company.com"
                               required
+                              value={formData.email}
+                              onChange={handleChange}
                               className={inputClass}
                             />
                           </div>
@@ -255,6 +286,8 @@ export default function ContactPage() {
                               type="tel"
                               placeholder="+91 98765 43210"
                               required
+                              value={formData.phone}
+                              onChange={handleChange}
                               className={inputClass}
                             />
                           </div>
@@ -266,6 +299,8 @@ export default function ContactPage() {
                               id="company"
                               type="text"
                               placeholder="Your Company Ltd."
+                              value={formData.company}
+                              onChange={handleChange}
                               className={inputClass}
                             />
                           </div>
@@ -277,6 +312,8 @@ export default function ContactPage() {
                           </label>
                           <select
                             id="service"
+                            value={formData.service}
+                            onChange={handleChange}
                             className={`${inputClass} cursor-pointer`}
                           >
                             <option value="">Select a service</option>
@@ -299,6 +336,8 @@ export default function ContactPage() {
                             placeholder="Tell us about your logistics requirements..."
                             rows={5}
                             required
+                            value={formData.message}
+                            onChange={handleChange}
                             className={`${inputClass} h-auto resize-none py-3`}
                           />
                         </div>
