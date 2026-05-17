@@ -13,11 +13,6 @@ import {
 import { AnimatedSection } from "@/components/sections/animated-section";
 import { PincodeService } from "@/types";
 import Link from "next/link";
-const FIXED_SERVICES = [
-  { name: "DELHIVERY", type: "B2B", plan: "6-CFT" },
-  { name: "DELHIVERY", type: "B2B", plan: "10-CFT" },
-  { name: "DELHIVERY", type: "B2C", plan: "Express 0.5, 10KG, 20KG & 60KG" },
-];
 
 export default function PincodePage() {
   const [pincode, setPincode] = useState("");
@@ -123,7 +118,7 @@ export default function PincodePage() {
                   </h2>
                 </div>
 
-                <form onSubmit={handleCheck} className="flex gap-3">
+                <form onSubmit={handleCheck} className="flex flex-col sm:flex-row gap-3">
                   <input
                     type="text"
                     inputMode="numeric"
@@ -133,12 +128,12 @@ export default function PincodePage() {
                       setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))
                     }
                     maxLength={6}
-                    className="flex-1 h-14 px-5 rounded-xl bg-slate-50 border border-slate-200 text-[#0a1628] text-xl font-mono font-bold tracking-[0.3em] text-center placeholder:text-slate-300 placeholder:tracking-normal placeholder:text-base placeholder:font-normal focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/15 focus:bg-white transition-all duration-200"
+                    className="w-full sm:flex-1 h-14 px-5 rounded-xl bg-slate-50 border border-slate-200 text-[#0a1628] text-xl font-mono font-bold tracking-[0.3em] text-center placeholder:text-slate-300 placeholder:tracking-normal placeholder:text-base placeholder:font-normal focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/15 focus:bg-white transition-all duration-200"
                   />
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="h-14 px-7 flex items-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-400 text-white font-semibold rounded-xl shadow-md shadow-orange-500/25 transition-all duration-200 hover:-translate-y-0.5 text-sm shrink-0"
+                    className="h-14 px-7 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-400 text-white font-semibold rounded-xl shadow-md shadow-orange-500/25 transition-all duration-200 hover:-translate-y-0.5 text-sm w-full sm:w-auto sm:shrink-0"
                   >
                     {isLoading ? (
                       <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -190,84 +185,112 @@ export default function PincodePage() {
 
                     {/* Results Table */}
                     <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-[0_4px_24px_oklch(0.2_0.01_80/0.07)]">
-                      {/* Table Header */}
-                      <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-slate-50 border-b border-slate-100">
+
+                      {/* Desktop header — hidden on mobile */}
+                      <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-slate-50 border-b border-slate-100">
                         <div className="col-span-4">
                           <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                            Service Provider
+                            Courier Partner
                           </span>
                         </div>
                         <div className="col-span-4">
                           <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                            Center
+                            Service Plan
+                          </span>
+                        </div>
+                        <div className="col-span-2">
+                          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                            Location
                           </span>
                         </div>
                         <div className="col-span-2 text-center">
                           <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                            Serviceability
-                          </span>
-                        </div>
-                        <div className="col-span-2 text-center">
-                          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                            ODA
+                            Status
                           </span>
                         </div>
                       </div>
 
-                      {/* 3 Fixed Service Rows */}
-                      {FIXED_SERVICES.map((svc, i) => (
+                      {/* Supplier Rows */}
+                      {(result.suppliers ?? []).map((svc, i) => (
                         <motion.div
-                          key={i}
+                          key={svc.id}
                           initial={{ opacity: 0, x: -12 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: 0.15 + i * 0.07 }}
-                          className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-slate-100 last:border-0 hover:bg-slate-50/60 transition-colors duration-150"
+                          className="border-b border-slate-100 last:border-0 hover:bg-slate-50/60 transition-colors duration-150"
                         >
-                          {/* Col 1: Service Provider (fixed) */}
-                          <div className="col-span-4 flex items-center gap-2.5">
-                            <div className="w-7 h-7 rounded-lg bg-[#0a1628]/8 flex items-center justify-center shrink-0">
-                              <Building2 className="h-3.5 w-3.5 text-[#0a1628]/40" />
+                          {/* ── Mobile layout ── */}
+                          <div className="flex items-center gap-3 px-4 py-4 md:hidden">
+                            <div className="w-8 h-8 rounded-lg bg-[#0a1628]/8 flex items-center justify-center shrink-0">
+                              <Building2 className="h-4 w-4 text-[#0a1628]/40" />
                             </div>
-                            <div>
-                              <div className="flex items-baseline gap-1">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className="text-sm font-black text-[#0a1628] uppercase tracking-tight">
                                   {svc.name}
                                 </span>
-                                <span className="text-xs font-bold text-slate-400">
-                                  {svc.type}
-                                </span>
+                                {svc.type && (
+                                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-orange-100 text-orange-600 uppercase">
+                                    {svc.type}
+                                  </span>
+                                )}
                               </div>
-                              <p className="text-xs text-slate-400 mt-0.5">
-                                {svc.plan}
+                              <p className="text-xs text-slate-500 mt-0.5 truncate">
+                                {svc.accountName || "—"}
                               </p>
+                              {(result.city || result.state) && (
+                                <div className="flex items-center gap-1 mt-1">
+                                  <MapPin className="h-3 w-3 text-orange-400 shrink-0" />
+                                  <p className="text-xs text-slate-400">
+                                    {[result.city, result.state].filter(Boolean).join(", ")}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full shrink-0">
+                              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                             </div>
                           </div>
 
-                          {/* Col 2: Dispatch Center (from sheet column C) */}
-                          <div className="col-span-4 flex items-center gap-1.5">
-                            <MapPin className="h-3.5 w-3.5 text-slate-300 shrink-0" />
-                            <p className="text-sm text-slate-500 leading-snug">
-                              {result.dispatchCenter || "—"}
-                            </p>
-                          </div>
+                          {/* ── Desktop layout ── */}
+                          <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 items-center">
+                            {/* Col 1: Courier + type badge */}
+                            <div className="col-span-4 flex items-center gap-2.5">
+                              <div className="w-7 h-7 rounded-lg bg-[#0a1628]/8 flex items-center justify-center shrink-0">
+                                <Building2 className="h-3.5 w-3.5 text-[#0a1628]/40" />
+                              </div>
+                              <div>
+                                <span className="text-sm font-black text-[#0a1628] uppercase tracking-tight">
+                                  {svc.name}
+                                </span>
+                                {svc.type && (
+                                  <span className="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-orange-100 text-orange-600 uppercase">
+                                    {svc.type}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
 
-                          {/* Col 3: Serviceability — green if NORMAL SERVICE, red if ODA */}
-                          <div className="col-span-2 flex items-center justify-center">
-                            {!result.isODA ? (
+                            {/* Col 2: Service plan */}
+                            <div className="col-span-4 flex items-center">
+                              <span className="text-xs text-slate-500 leading-snug">
+                                {svc.accountName || "—"}
+                              </span>
+                            </div>
+
+                            {/* Col 3: Location */}
+                            <div className="col-span-2 flex items-center gap-1.5">
+                              <MapPin className="h-3.5 w-3.5 text-orange-400 shrink-0" />
+                              <span className="text-xs text-slate-500 leading-snug">
+                                {[result.city, result.state].filter(Boolean).join(", ") || "—"}
+                              </span>
+                            </div>
+
+                            {/* Col 4: Status */}
+                            <div className="col-span-2 flex items-center justify-center">
                               <div className="flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full">
                                 <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                               </div>
-                            ) : (
-                              <div className="flex items-center justify-center w-8 h-8 bg-red-100 rounded-full">
-                                <XCircle className="h-5 w-5 text-red-500" />
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Col 4: ODA — always red cross */}
-                          <div className="col-span-2 flex items-center justify-center">
-                            <div className="flex items-center justify-center w-8 h-8 bg-red-100 rounded-full">
-                              <XCircle className="h-5 w-5 text-red-500" />
                             </div>
                           </div>
                         </motion.div>
@@ -275,20 +298,17 @@ export default function PincodePage() {
                     </div>
 
                     {/* Legend */}
-                    <div className="flex items-center gap-6 mt-4 px-1 text-xs text-slate-400">
+                    <div className="flex items-center gap-4 mt-4 px-1 text-xs text-slate-400 flex-wrap">
                       <div className="flex items-center gap-1.5">
                         <div className="w-4 h-4 bg-emerald-100 rounded-full flex items-center justify-center">
                           <CheckCircle2 className="h-2.5 w-2.5 text-emerald-500" />
                         </div>
-                        Available
+                        Service Available
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <div className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center">
-                          <XCircle className="h-2.5 w-2.5 text-red-500" />
-                        </div>
-                        Not Available
+                        <MapPin className="h-3 w-3 text-orange-400" />
+                        Delivery area for PIN {result.pincode}
                       </div>
-                      <span>ODA = Out of Delivery Area</span>
                     </div>
 
                     {/* CTA Buttons */}

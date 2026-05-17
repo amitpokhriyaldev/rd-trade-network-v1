@@ -86,6 +86,14 @@ export interface Milestone {
   description: string
 }
 
+export interface PincodeSupplier {
+  id: number
+  name: string
+  accountName: string
+  type: string
+  total: number | null
+}
+
 export interface PincodeService {
   pincode: string
   city: string
@@ -93,8 +101,7 @@ export interface PincodeService {
   available: boolean
   services: string[]
   estimated_days: number
-  dispatchCenter?: string
-  isODA?: boolean
+  suppliers?: PincodeSupplier[]
 }
 
 export interface ContactFormData {

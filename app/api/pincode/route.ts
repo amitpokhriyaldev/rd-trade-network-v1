@@ -1,79 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const SHEET_ID = "1sWzXIveLRJUBnyCYcWb7m6F4J2TdMS9NOaFoTzD3Zi8";
-const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
-const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+const API = process.env.CARGOWALE_API_URL ?? "https://api.cargowale.in";
+// Set CARGOWALE_ORIGIN_PINCODE to your warehouse pincode in .env.local
+const ORIGIN_PINCODE = Number(process.env.CARGOWALE_ORIGIN_PINCODE ?? "110001");
 
-interface SheetRow {
-  pincode: string;
-  dispatchCenter: string;
-  originCenter: string;
-  city: string;
-  state: string;
-  isODA: boolean;
+let cachedToken: string | null = null;
+
+async function getToken(): Promise<string> {
+  if (cachedToken) return cachedToken;
+  const res = await fetch(`${API}/api/auth/v1/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-env": "dev" },
+    body: JSON.stringify({
+      emailOrUsername: process.env.CARGOWALE_EMAIL,
+      password: process.env.CARGOWALE_PASSWORD,
+    }),
+    cache: "no-store",
+  });
+  const json = await res.json();
+  if (!res.ok || !json.data?.token) {
+    throw new Error(`Cargowale login failed: ${json.message ?? res.status}`);
+  }
+  cachedToken = json.data.token as string;
+  return cachedToken;
 }
 
-let cachedRows: SheetRow[] | null = null;
-let cacheTimestamp = 0;
-
-// Simple CSV parser that handles quoted fields
-function parseCSV(text: string): string[][] {
-  const rows: string[][] = [];
-  const lines = text.split(/\r?\n/);
-  for (const line of lines) {
-    if (!line.trim()) continue;
-    const cols: string[] = [];
-    let inQuotes = false;
-    let current = "";
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      if (ch === '"') {
-        inQuotes = !inQuotes;
-      } else if (ch === "," && !inQuotes) {
-        cols.push(current.trim());
-        current = "";
-      } else {
-        current += ch;
-      }
+async function getCityState(pincode: string): Promise<{ city: string; state: string }> {
+  try {
+    const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`, {
+      cache: "no-store",
+      signal: AbortSignal.timeout(3000),
+    });
+    const json = await res.json();
+    const offices = json?.[0]?.PostOffice;
+    if (Array.isArray(offices) && offices.length > 0) {
+      return { city: offices[0].District ?? "", state: offices[0].State ?? "" };
     }
-    cols.push(current.trim());
-    rows.push(cols);
+  } catch {
+    // non-critical — UI degrades gracefully without city/state
   }
-  return rows;
-}
-
-async function getSheetData(): Promise<SheetRow[]> {
-  const now = Date.now();
-  if (cachedRows && now - cacheTimestamp < CACHE_TTL_MS) {
-    return cachedRows;
-  }
-
-  const response = await fetch(SHEET_CSV_URL, { cache: "no-store" });
-  if (!response.ok) {
-    throw new Error(`Google Sheets fetch failed: ${response.status}`);
-  }
-
-  const text = await response.text();
-  const rows = parseCSV(text);
-
-  // Skip header row; columns: [0] Sr No, [1] Pincode, [2] Dispatch Center,
-  // [3] Origin Center, [4] Facility City, [5] Facility State, [6] ODA
-  const data: SheetRow[] = rows
-    .slice(1)
-    .map((cols) => ({
-      pincode: String(cols[1] ?? "").trim().padStart(6, "0"),
-      dispatchCenter: String(cols[2] ?? "").trim(),
-      originCenter: String(cols[3] ?? "").trim(),
-      city: String(cols[4] ?? "").trim(),
-      state: String(cols[5] ?? "").trim(),
-      // Column G: "NORMAL SERVICE" → not ODA, "ODA" → is ODA
-      isODA: String(cols[6] ?? "").trim().toUpperCase() === "ODA",
-    }))
-    .filter((row) => /^\d{6}$/.test(row.pincode));
-
-  cachedRows = data;
-  cacheTimestamp = now;
-  return data;
+  return { city: "", state: "" };
 }
 
 export async function GET(request: NextRequest) {
@@ -81,30 +47,64 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const pincode = searchParams.get("pincode");
 
-    if (!pincode) {
-      return NextResponse.json({ error: "Pincode is required" }, { status: 400 });
-    }
-
-    if (!/^\d{6}$/.test(pincode)) {
+    if (!pincode || !/^\d{6}$/.test(pincode)) {
       return NextResponse.json(
         { error: "Invalid pincode format. Must be 6 digits." },
         { status: 400 }
       );
     }
 
-    const sheetData = await getSheetData();
-    const match = sheetData.find((row) => row.pincode === pincode);
+    let token: string;
+    try {
+      token = await getToken();
+    } catch {
+      return NextResponse.json(
+        { error: "Service unavailable. Please try again later." },
+        { status: 503 }
+      );
+    }
 
-    if (!match) {
+    const [calcRes, location] = await Promise.all([
+      fetch(`${API}/api/v1/shipment/calculate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          origin_pincode: ORIGIN_PINCODE,
+          destination_pincode: Number(pincode),
+          weight: 0.5,
+          invoice_value: 1,
+          insurance: false,
+          self_drop: false,
+          payment_mode: "prepaid",
+          cod_value: 0,
+          items: [{ quantity: 1, length: 10, width: 10, height: 10 }],
+        }),
+        cache: "no-store",
+      }).then((r) => r.json()),
+      getCityState(pincode),
+    ]);
+
+    // Each item in calcRes.data is { status: "true", data: { supplier_name, total, ... } }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rawItems: any[] = Array.isArray(calcRes?.data) ? calcRes.data : [];
+    const suppliers = rawItems
+      .filter((item) => item?.status === "true" && item?.data)
+      .map((item) => item.data);
+
+    if (!calcRes?.success || suppliers.length === 0) {
       return NextResponse.json({
         success: true,
         service: {
           pincode,
-          city: "",
-          state: "",
+          city: location.city,
+          state: location.state,
           available: false,
           services: [],
           estimated_days: 0,
+          suppliers: [],
         },
       });
     }
@@ -113,13 +113,18 @@ export async function GET(request: NextRequest) {
       success: true,
       service: {
         pincode,
-        city: match.city,
-        state: match.state,
+        city: location.city,
+        state: location.state,
         available: true,
-        services: [],
+        services: suppliers.map((s) => String(s.supplier_name ?? "")),
         estimated_days: 2,
-        dispatchCenter: match.dispatchCenter,
-        isODA: match.isODA,
+        suppliers: suppliers.map((s) => ({
+          id: Number(s.supplier_id),
+          name: String(s.supplier_name ?? ""),
+          accountName: String(s.supplier_multi_account_name ?? ""),
+          type: String(s.supplier_type ?? ""),
+          total: s.total != null ? Number(s.total) : null,
+        })),
       },
     });
   } catch (error) {
