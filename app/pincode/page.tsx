@@ -7,6 +7,7 @@ import {
   MapPin,
   CheckCircle2,
   XCircle,
+  AlertCircle,
   ArrowRight,
   Building2,
 } from "lucide-react";
@@ -165,23 +166,49 @@ export default function PincodePage() {
               >
                 {result.available ? (
                   <>
-                    {/* Success Banner */}
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.97 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.1 }}
-                      className="flex items-center gap-4 bg-emerald-50 border border-emerald-200 rounded-2xl px-6 py-4 mb-6"
-                    >
-                      <CheckCircle2 className="h-8 w-8 text-emerald-500 shrink-0" />
-                      <div>
-                        <p className="font-bold text-emerald-700 text-base">
-                          Service Available!
-                        </p>
-                        <p className="text-sm text-emerald-600">
-                          {result.city}, {result.state} — PIN: {result.pincode}
-                        </p>
-                      </div>
-                    </motion.div>
+                    {/* Success / ODA Banner */}
+                    {(() => {
+                      const allOda =
+                        (result.suppliers ?? []).length > 0 &&
+                        (result.suppliers ?? []).every((s) => s.oda);
+                      return (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.97 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.1 }}
+                          className={`flex items-center gap-4 rounded-2xl px-6 py-4 mb-6 border ${
+                            allOda
+                              ? "bg-amber-50 border-amber-200"
+                              : "bg-emerald-50 border-emerald-200"
+                          }`}
+                        >
+                          {allOda ? (
+                            <AlertCircle className="h-8 w-8 text-amber-500 shrink-0" />
+                          ) : (
+                            <CheckCircle2 className="h-8 w-8 text-emerald-500 shrink-0" />
+                          )}
+                          <div>
+                            <p
+                              className={`font-bold text-base ${
+                                allOda ? "text-amber-700" : "text-emerald-700"
+                              }`}
+                            >
+                              {allOda
+                                ? "Out of Delivery Area (ODA)"
+                                : "Service Available!"}
+                            </p>
+                            <p
+                              className={`text-sm ${
+                                allOda ? "text-amber-600" : "text-emerald-600"
+                              }`}
+                            >
+                              {result.city}, {result.state} — PIN:{" "}
+                              {result.pincode}
+                            </p>
+                          </div>
+                        </motion.div>
+                      );
+                    })()}
 
                     {/* Results Table */}
                     <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-[0_4px_24px_oklch(0.2_0.01_80/0.07)]">
@@ -247,9 +274,15 @@ export default function PincodePage() {
                                 </div>
                               )}
                             </div>
-                            <div className="flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full shrink-0">
-                              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                            </div>
+                            {svc.oda ? (
+                              <div className="flex items-center justify-center w-8 h-8 bg-amber-100 rounded-full shrink-0">
+                                <AlertCircle className="h-5 w-5 text-amber-500" />
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full shrink-0">
+                                <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                              </div>
+                            )}
                           </div>
 
                           {/* ── Desktop layout ── */}
@@ -288,9 +321,15 @@ export default function PincodePage() {
 
                             {/* Col 4: Status */}
                             <div className="col-span-2 flex items-center justify-center">
-                              <div className="flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full">
-                                <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                              </div>
+                              {svc.oda ? (
+                                <div className="flex items-center justify-center w-8 h-8 bg-amber-100 rounded-full">
+                                  <AlertCircle className="h-5 w-5 text-amber-500" />
+                                </div>
+                              ) : (
+                                <div className="flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full">
+                                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                                </div>
+                              )}
                             </div>
                           </div>
                         </motion.div>
@@ -304,6 +343,12 @@ export default function PincodePage() {
                           <CheckCircle2 className="h-2.5 w-2.5 text-emerald-500" />
                         </div>
                         Service Available
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-4 h-4 bg-amber-100 rounded-full flex items-center justify-center">
+                          <AlertCircle className="h-2.5 w-2.5 text-amber-500" />
+                        </div>
+                        Out of Delivery Area (ODA)
                       </div>
                       <div className="flex items-center gap-1.5">
                         <MapPin className="h-3 w-3 text-orange-400" />

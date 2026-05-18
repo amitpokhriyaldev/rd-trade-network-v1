@@ -92,6 +92,7 @@ export interface PincodeSupplier {
   accountName: string
   type: string
   total: number | null
+  oda: boolean
 }
 
 export interface PincodeService {

@@ -124,6 +124,7 @@ export async function GET(request: NextRequest) {
           accountName: String(s.supplier_multi_account_name ?? ""),
           type: String(s.supplier_type ?? ""),
           total: s.total != null ? Number(s.total) : null,
+          oda: Number(s.fields?.ODA ?? 0) > 0,
         })),
       },
     });
