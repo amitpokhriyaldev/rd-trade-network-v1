@@ -215,12 +215,12 @@ export default function PincodePage() {
 
                       {/* Desktop header — hidden on mobile */}
                       <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-slate-50 border-b border-slate-100">
-                        <div className="col-span-4">
+                        <div className="col-span-3">
                           <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
                             Courier Partner
                           </span>
                         </div>
-                        <div className="col-span-4">
+                        <div className="col-span-3">
                           <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
                             Service Plan
                           </span>
@@ -232,7 +232,12 @@ export default function PincodePage() {
                         </div>
                         <div className="col-span-2 text-center">
                           <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                            Status
+                            Serviceable
+                          </span>
+                        </div>
+                        <div className="col-span-2 text-center">
+                          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                            ODA
                           </span>
                         </div>
                       </div>
@@ -247,8 +252,8 @@ export default function PincodePage() {
                           className="border-b border-slate-100 last:border-0 hover:bg-slate-50/60 transition-colors duration-150"
                         >
                           {/* ── Mobile layout ── */}
-                          <div className="flex items-center gap-3 px-4 py-4 md:hidden">
-                            <div className="w-8 h-8 rounded-lg bg-[#0a1628]/8 flex items-center justify-center shrink-0">
+                          <div className="flex items-start gap-3 px-4 py-4 md:hidden">
+                            <div className="w-8 h-8 rounded-lg bg-[#0a1628]/8 flex items-center justify-center shrink-0 mt-0.5">
                               <Building2 className="h-4 w-4 text-[#0a1628]/40" />
                             </div>
                             <div className="flex-1 min-w-0">
@@ -273,22 +278,36 @@ export default function PincodePage() {
                                   </p>
                                 </div>
                               )}
+                              {/* Status pills */}
+                              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full ${
+                                  !svc.oda
+                                    ? "bg-emerald-100 text-emerald-700"
+                                    : "bg-red-100 text-red-600"
+                                }`}>
+                                  {!svc.oda
+                                    ? <CheckCircle2 className="h-3 w-3" />
+                                    : <XCircle className="h-3 w-3" />}
+                                  Serviceable: {!svc.oda ? "YES" : "NO"}
+                                </span>
+                                <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full ${
+                                  svc.oda
+                                    ? "bg-amber-100 text-amber-700"
+                                    : "bg-slate-100 text-slate-500"
+                                }`}>
+                                  {svc.oda
+                                    ? <CheckCircle2 className="h-3 w-3" />
+                                    : <XCircle className="h-3 w-3" />}
+                                  ODA: {svc.oda ? "YES" : "NO"}
+                                </span>
+                              </div>
                             </div>
-                            {svc.oda ? (
-                              <div className="flex items-center justify-center w-8 h-8 bg-amber-100 rounded-full shrink-0">
-                                <AlertCircle className="h-5 w-5 text-amber-500" />
-                              </div>
-                            ) : (
-                              <div className="flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full shrink-0">
-                                <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                              </div>
-                            )}
                           </div>
 
                           {/* ── Desktop layout ── */}
                           <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 items-center">
                             {/* Col 1: Courier + type badge */}
-                            <div className="col-span-4 flex items-center gap-2.5">
+                            <div className="col-span-3 flex items-center gap-2.5">
                               <div className="w-7 h-7 rounded-lg bg-[#0a1628]/8 flex items-center justify-center shrink-0">
                                 <Building2 className="h-3.5 w-3.5 text-[#0a1628]/40" />
                               </div>
@@ -305,7 +324,7 @@ export default function PincodePage() {
                             </div>
 
                             {/* Col 2: Service plan */}
-                            <div className="col-span-4 flex items-center">
+                            <div className="col-span-3 flex items-center">
                               <span className="text-xs text-slate-500 leading-snug">
                                 {svc.accountName || "—"}
                               </span>
@@ -319,15 +338,28 @@ export default function PincodePage() {
                               </span>
                             </div>
 
-                            {/* Col 4: Status */}
+                            {/* Col 4: Serviceable */}
+                            <div className="col-span-2 flex items-center justify-center">
+                              {!svc.oda ? (
+                                <div className="flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full">
+                                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                                </div>
+                              ) : (
+                                <div className="flex items-center justify-center w-8 h-8 bg-red-100 rounded-full">
+                                  <XCircle className="h-5 w-5 text-red-500" />
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Col 5: ODA */}
                             <div className="col-span-2 flex items-center justify-center">
                               {svc.oda ? (
                                 <div className="flex items-center justify-center w-8 h-8 bg-amber-100 rounded-full">
-                                  <AlertCircle className="h-5 w-5 text-amber-500" />
+                                  <CheckCircle2 className="h-5 w-5 text-amber-500" />
                                 </div>
                               ) : (
-                                <div className="flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full">
-                                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                                <div className="flex items-center justify-center w-8 h-8 bg-red-100 rounded-full">
+                                  <XCircle className="h-5 w-5 text-red-500" />
                                 </div>
                               )}
                             </div>
@@ -342,17 +374,23 @@ export default function PincodePage() {
                         <div className="w-4 h-4 bg-emerald-100 rounded-full flex items-center justify-center">
                           <CheckCircle2 className="h-2.5 w-2.5 text-emerald-500" />
                         </div>
-                        Service Available
+                        Yes
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center">
+                          <XCircle className="h-2.5 w-2.5 text-red-500" />
+                        </div>
+                        No
                       </div>
                       <div className="flex items-center gap-1.5">
                         <div className="w-4 h-4 bg-amber-100 rounded-full flex items-center justify-center">
-                          <AlertCircle className="h-2.5 w-2.5 text-amber-500" />
+                          <CheckCircle2 className="h-2.5 w-2.5 text-amber-500" />
                         </div>
-                        Out of Delivery Area (ODA)
+                        ODA (Out of Delivery Area)
                       </div>
                       <div className="flex items-center gap-1.5">
                         <MapPin className="h-3 w-3 text-orange-400" />
-                        Delivery area for PIN {result.pincode}
+                        PIN {result.pincode}
                       </div>
                     </div>
 
